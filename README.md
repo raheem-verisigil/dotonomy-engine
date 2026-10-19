@@ -1,0 +1,23 @@
+# Dotonomy v0.1
+
+Working prototype: goal-to-outcome runtime. Contract, Dot registry, preflight verifier (P1-P5, P7, P8), purpose-bound Context filtering, label propagation, outcome verifier, signed hash-chained receipts (ed25519), trial gating. Fixture data only. Read-only. No real connectors yet.
+
+## Run
+    npm install && npm test && npm start     # http://localhost:3000
+
+## Push to GitHub
+    git init -b main && git add . && git commit -m "Dotonomy v0.1"
+    git remote add origin https://github.com/<you>/dotonomy.git && git push -u origin main
+
+## Deploy on Railway
+1. New Project > Deploy from GitHub repo > pick dotonomy. Railway reads railway.json.
+2. Variables: `SIGNING_KEY_PEM` (see below), `DATA_DIR=/data`, optional `TRIAL_RUNS=5`, `ALLOW_DEMO_UNLOCK=false` once real billing exists.
+3. Add a Volume mounted at `/data` so receipts and the key survive redeploys.
+4. Settings > Networking > Generate Domain.
+
+Generate a key: `node -e "console.log(require('crypto').generateKeyPairSync('ed25519').privateKey.export({type:'pkcs8',format:'pem'}).replace(/\n/g,'\\\\n'))"`
+
+## Known limits
+- JSON-file storage (single instance). Move to Postgres before scaling.
+- The Unlock button is a demo switch. No payment provider is wired.
+- Not implemented yet: P6, P9-P12, real connectors, auth/SSO, replay, SDK.

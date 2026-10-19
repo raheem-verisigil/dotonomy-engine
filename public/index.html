@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dotonomy: work product with proof</title>
+<style>
+:root{--bg:#eef1f4;--p:#fff;--t:#16202b;--m:#5b6875;--line:#cfd6dd;--ok:#0b7a5a;--warn:#a86400;--bad:#b3261e;--ink:#10304a}
+@media(prefers-color-scheme:dark){:root{--bg:#0e141a;--p:#151d26;--t:#e7edf3;--m:#93a1af;--line:#2b3744;--ok:#3ccf9f;--warn:#e0a030;--bad:#ff7b72;--ink:#8cc4ee}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:28px 20px 10px;max-width:1040px;margin:auto}h1{font:600 30px/1.15 Georgia,serif;margin:0 0 6px;color:var(--ink)}header p{margin:0;color:var(--m);max-width:62ch}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--m)}
+nav{max-width:1040px;margin:12px auto 0;padding:0 20px;display:flex;gap:4px;border-bottom:1px solid var(--line)}
+nav button{background:none;border:0;padding:10px 14px;font:inherit;color:var(--m);cursor:pointer;border-bottom:2px solid transparent}nav button[aria-selected=true]{color:var(--t);border-color:var(--ink);font-weight:600}
+main{max-width:1040px;margin:18px auto;padding:0 20px 60px}.grid{display:grid;grid-template-columns:300px 1fr;gap:20px}@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.card{background:var(--p);border:1px solid var(--line);border-radius:6px;padding:16px}h3{margin:0 0 10px;font-size:15px}
+label{display:block;margin:8px 0;font-size:14px}input[type=text],select{width:100%;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--t);font:inherit}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}button.b{padding:9px 14px;border-radius:4px;border:1px solid var(--ink);background:var(--ink);color:var(--p);font:inherit;cursor:pointer}button.b.alt{background:none;color:var(--ink)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid currentColor}
+.pass,.SATISFIED,.SUPPORTED{color:var(--ok)}.fail,.FAILED,.BLOCKED,.CONFLICTED{color:var(--bad)}.CONDITIONAL,.STALE{color:var(--warn)}.UNKNOWN{color:var(--m)}
+.cite{font:11px ui-monospace,monospace;color:var(--m);border:1px solid var(--line);border-radius:3px;padding:0 4px;margin-left:4px}
+.status{font:600 22px Georgia,serif;margin:0 0 8px}.sug{color:var(--m);font-style:italic}
+pre.receipt{font:12px/1.45 ui-monospace,monospace;background:var(--bg);border:1px dashed var(--m);padding:12px;overflow:auto;max-height:340px;white-space:pre-wrap;word-break:break-all}
+.wm{border:1px dashed var(--warn);color:var(--warn);padding:6px 10px;border-radius:4px;font-size:13px;margin-bottom:10px}
+.dot{margin-bottom:12px}.dot code{font:13px ui-monospace,monospace}.empty{color:var(--m)}
+</style></head><body>
+<header><h1>Dotonomy</h1><p>Ask for a result. Dotonomy checks what it is allowed to do before it runs, then hands back the work with a receipt you can verify.</p>
+<div class="bar"><span id="trial">Loading</span><button class="b alt" id="unlock" hidden>Unlock signed receipts (demo)</button></div></header>
+<nav role="tablist"><button role="tab" aria-selected="true" data-t="run">Prepare a meeting</button><button role="tab" aria-selected="false" data-t="dots">Capabilities</button><button role="tab" aria-selected="false" data-t="rcpt">My receipts</button></nav>
+<main>
+<section id="run"><div class="grid"><div class="card"><h3>Request</h3>
+<label>Client or meeting<select id="hint"><option>Northstar</option><option>Acme</option><option>Globex</option></select></label>
+<h3 style="margin-top:14px">Permissions you grant</h3>
+<label><input class="g" type="checkbox" value="calendar.read" checked> Read calendar</label><label><input class="g" type="checkbox" value="crm.read" checked> Read CRM</label>
+<label><input class="g" type="checkbox" value="mail.read" checked> Read email</label><label><input class="g" type="checkbox" value="docs.read" checked> Read documents</label>
+<h3 style="margin-top:14px">Try to break it</h3>
+<label><input id="ext" type="checkbox"> Send data to an external model</label><label><input id="snd" type="checkbox"> Add an unregistered "send email" step</label>
+<div class="row"><button class="b alt" id="pre">Check plan only</button><button class="b" id="go">Run</button></div></div>
+<div class="card" id="out"><p class="empty">Pick a client and select Run. Northstar succeeds, Acme is ambiguous, Globex has stale data. Then turn on a break-it option to see the plan rejected before anything runs.</p></div></div></section>
+<section id="dots" hidden></section><section id="rcpt" hidden></section></main>
+<script>
+const ws=localStorage.dnws||(localStorage.dnws=Math.random().toString(36).slice(2,12)),$=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const api=async(p,b)=>{const r=await fetch('/api/'+p,{method:b?'POST':'GET',headers:{'content-type':'application/json','x-workspace':ws},body:b?JSON.stringify(b):undefined});return{s:r.status,d:await r.json()}};
+const o=()=>({hint:$('#hint').value,grants:[...document.querySelectorAll('.g:checked')].map(x=>x.value),externalModel:$('#ext').checked,injectSend:$('#snd').checked});
+const chip=s=>`<span class="chip ${s}">${s}</span>`;let last=null;
+const pre=p=>`<table>${p.checks.map(c=>`<tr><td>${c.id}</td><td>${esc(c.name)}</td><td>${chip(c.result)}</td><td>${esc(c.detail)}</td></tr>`).join('')}</table>`;
+async function state(){const{d}=await api('state');$('#trial').textContent=d.paid?'Signed receipts on':`Trial: ${d.runs} of ${d.cap} runs used`;$('#unlock').hidden=d.paid}
+$('#pre').onclick=async()=>{const{d}=await api('plan',o());$('#out').innerHTML=`<h3>Plan check</h3>${pre(d)}<p>${d.ok?'This plan is allowed to run.':'This plan would be rejected. Nothing runs.'}</p>`};
+$('#go').onclick=async()=>{const{s,d}=await api('run',o());if(s===402){$('#out').innerHTML='<p class="BLOCKED">Trial run limit reached. Unlock to keep running.</p>';return}
+ last=d.receipt;state();let h=`<p class="status ${d.status}">${d.status}</p>`;
+ if(d.watermark)h+='<div class="wm">Trial preview: this receipt is unsigned. Unlock to get a signed, verifiable one.</div>';
+ h+=`<h3>Plan check</h3>${pre(d.preflight)}`;
+ if(d.halted)h+=`<h3>Stopped</h3><p>${esc(d.halted.code)}. ${(d.halted.candidates||[]).map(esc).join(' | ')}. Choose one and run again.</p>`;
+ if(d.brief?.claims)h+=`<h3>Brief</h3><ul>${d.brief.claims.map(c=>c.kind==='fact'?`<li>${esc(c.text)}${c.cites.map(x=>`<span class="cite">${esc(x)}</span>`).join('')}</li>`:`<li class="sug">${esc(c.text)}</li>`).join('')}</ul>`;
+ if(d.warnings.length)h+=`<h3>Gaps</h3><ul>${d.warnings.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`;
+ h+=`<h3>Requirements</h3><table>${d.requirements.map(r=>`<tr><td>${r.id}</td><td>${esc(r.text)}</td><td>${chip(r.state)}</td><td>${esc(r.note)}</td></tr>`).join('')}</table>`;
+ h+=`<h3 style="margin-top:14px">Receipt</h3><pre class="receipt">${esc(JSON.stringify(d.receipt,null,1))}</pre><div class="row"><button class="b alt" id="vf">Verify receipt</button><button class="b alt" id="tp">Change one field, then verify</button></div><p id="vr"></p>`;
+ $('#out').innerHTML=h;
+ const v=async r=>{const{d}=await api('verify',{receipt:r});$('#vr').innerHTML=`${chip(d.valid?'pass':'fail')} ${esc(d.reason)}`};
+ $('#vf').onclick=()=>v(last);$('#tp').onclick=()=>{const t=structuredClone(last);t.outcome_status='SATISFIED';t.requirements[0].state='SATISFIED';t.warnings=[];t.run_id+='x';v(t)}};
+$('#unlock').onclick=async()=>{await api('workspace/unlock',{});state()};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=async()=>{document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));['run','dots','rcpt'].forEach(t=>$('#'+t).hidden=t!==b.dataset.t);
+ if(b.dataset.t==='dots'){const{d}=await api('dots');$('#dots').innerHTML=d.map(x=>`<div class="card dot"><code>${x.id}</code> v${x.version} ${chip(x.effect==='read'?'pass':'CONDITIONAL')} ${x.effect}<br>Needs: ${x.permissions.join(', ')||'none'}. Takes: ${x.inputs.join(', ')||'user request'}. Returns: ${x.output}. Labels: ${x.labels.join(', ')||'none'}.<br>Fields it may receive: ${esc(JSON.stringify(x.accepts))}</div>`).join('')}
+ if(b.dataset.t==='rcpt'){const{d}=await api('receipts');$('#rcpt').innerHTML=d.length?`<div class="card"><table><tr><th>Receipt</th><th>Status</th><th>Signed</th><th>Time</th></tr>${d.map(r=>`<tr><td>${r.receipt_id}</td><td>${chip(r.outcome_status)}</td><td>${r.signed?'yes':'preview'}</td><td>${r.created_at.slice(0,19)}</td></tr>`).join('')}</table></div>`:'<p class="empty">No receipts yet. Run a meeting brief first.</p>'}});
+state();
+</script></body></html>

@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';import crypto from 'node:crypto';
+import {buildPlan,preflight,execute,evaluate,makeReceipt,verifyReceipt} from '../engine.js';
+const G=['calendar.read','crm.read','mail.read','docs.read'];
+const run=(hint,o={},g=G)=>{const plan=buildPlan(o),pre=preflight(plan,g);if(!pre.ok)return{plan,pre};const res=execute(plan,hint);return{plan,pre,res,ev:evaluate(res)}};
+test('Northstar is SATISFIED, fully cited, zero writes',()=>{const x=run('Northstar');assert.equal(x.ev.status,'SATISFIED');assert.deepEqual(x.res.D.s6.value.unsupported,[]);assert.ok(x.res.inv.every(i=>['read','compute','draft'].includes(i.effect)))});
+test('compose never receives internal_margin',()=>{const x=run('Northstar');const c=x.res.inv.find(i=>i.dot==='brief.compose');assert.ok(!JSON.stringify(c.received).includes('internal_margin'))});
+test('Acme is ambiguous and BLOCKED',()=>{const x=run('Acme');assert.equal(x.res.halted.code,'AMBIGUOUS_MATCH');assert.equal(x.ev.status,'BLOCKED')});
+test('Globex has stale CRM: CONDITIONAL, absence recorded',()=>{const x=run('Globex');assert.equal(x.ev.status,'CONDITIONAL');assert.match(x.ev.reqs[2].note,/absence/)});
+test('preflight blocks bad plans',()=>{assert.equal(run('Northstar',{},G.filter(g=>g!=='mail.read')).pre.checks.find(c=>c.id==='P2').result,'fail');
+ assert.equal(run('Northstar',{injectSend:true}).pre.checks.find(c=>c.id==='P8').result,'fail');
+ assert.equal(run('Northstar',{externalModel:true}).pre.checks.find(c=>c.id==='P4').result,'fail')});
+test('signed receipt verifies and tampering is detected',()=>{const{privateKey,publicKey}=crypto.generateKeyPairSync('ed25519');const x=run('Northstar');
+ const r=makeReceipt({runId:'t1',plan:x.plan,pre:x.pre,res:x.res,ev:x.ev,result:x.res.D.s5.value,prev:null,priv:privateKey,keyId:'k'});
+ assert.equal(verifyReceipt(r,publicKey).valid,true);const t=structuredClone(r);t.requirements[0].state='FAILED';assert.equal(verifyReceipt(t,publicKey).valid,false);
+ const u=makeReceipt({runId:'t2',plan:x.plan,pre:x.pre,res:x.res,ev:x.ev,result:{},prev:null,priv:null,keyId:'k'});assert.equal(verifyReceipt(u,publicKey).reason,'UNSIGNED_PREVIEW')});
