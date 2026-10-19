@@ -21,3 +21,6 @@ Generate a key: `node -e "console.log(require('crypto').generateKeyPairSync('ed2
 - JSON-file storage (single instance). Move to Postgres before scaling.
 - The Unlock button is a demo switch. No payment provider is wired.
 - Not implemented yet: P6, P9-P12, real connectors, auth/SSO, replay, SDK.
+
+## Benchmark
+`npm run bench` compares the Dotonomy runtime with two SIMULATED plain-agent baselines on 8 cases (ambiguity, stale data, permission, confidential data to external model, injection, no match, malformed tool output). The baselines are rule-coded, so the result validates the harness only. To make it evidence, replace `agent()` in bench.js with a real LLM tool-calling agent using the same fixtures, run each case many times, and report variance.
