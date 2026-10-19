@@ -19,10 +19,10 @@ table{width:100%;border-collapse:collapse;font-size:13.5px}td,th{padding:6px 8px
 .status{font:600 22px Georgia,serif;margin:0 0 8px}.sug{color:var(--m);font-style:italic}
 pre.receipt{font:12px/1.45 ui-monospace,monospace;background:var(--bg);border:1px dashed var(--m);padding:12px;overflow:auto;max-height:340px;white-space:pre-wrap;word-break:break-all}
 .wm{border:1px dashed var(--warn);color:var(--warn);padding:6px 10px;border-radius:4px;font-size:13px;margin-bottom:10px}
-.dot{margin-bottom:12px}.dot code{font:13px ui-monospace,monospace}.empty{color:var(--m)}
+.af{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.af input{padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--p);color:var(--t);font:inherit;width:190px}.dot{margin-bottom:12px}.dot code{font:13px ui-monospace,monospace}.empty{color:var(--m)}
 </style></head><body>
 <header><h1>Dotonomy</h1><p>Ask for a result. Dotonomy checks what it is allowed to do before it runs, then hands back the work with a receipt you can verify.</p>
-<div class="bar"><span id="trial">Loading</span><button class="b alt" id="unlock" hidden>Unlock signed receipts (demo)</button></div></header>
+<div class="bar"><span id="trial">Loading</span><span id="acct"></span><form id="af" class="af" onsubmit="return false"><input id="em" type="email" placeholder="email" autocomplete="username" aria-label="Email"><input id="pw" type="password" placeholder="password, 10+ characters" autocomplete="current-password" aria-label="Password"><button class="b alt" id="li" type="button">Log in</button><button class="b alt" id="su" type="button">Sign up</button><span id="amsg" class="BLOCKED"></span></form><button class="b alt" id="lo" hidden>Log out</button><button class="b alt" id="unlock" hidden>Unlock signed receipts (demo)</button></div></header>
 <nav role="tablist"><button role="tab" aria-selected="true" data-t="run">Prepare a meeting</button><button role="tab" aria-selected="false" data-t="dots">Capabilities</button><button role="tab" aria-selected="false" data-t="rcpt">My receipts</button></nav>
 <main>
 <section id="run"><div class="grid"><div class="card"><h3>Request</h3>
@@ -37,11 +37,13 @@ pre.receipt{font:12px/1.45 ui-monospace,monospace;background:var(--bg);border:1p
 <section id="dots" hidden></section><section id="rcpt" hidden></section></main>
 <script>
 const ws=localStorage.dnws||(localStorage.dnws=Math.random().toString(36).slice(2,12)),$=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const api=async(p,b)=>{const r=await fetch('/api/'+p,{method:b?'POST':'GET',headers:{'content-type':'application/json','x-workspace':ws},body:b?JSON.stringify(b):undefined});return{s:r.status,d:await r.json()}};
+const api=async(p,b)=>{const r=await fetch('/api/'+p,{method:b?'POST':'GET',headers:{'content-type':'application/json'},body:b?JSON.stringify(b):undefined});return{s:r.status,d:await r.json()}};
 const o=()=>({hint:$('#hint').value,grants:[...document.querySelectorAll('.g:checked')].map(x=>x.value),externalModel:$('#ext').checked,injectSend:$('#snd').checked});
 const chip=s=>`<span class="chip ${s}">${s}</span>`;let last=null;
 const pre=p=>`<table>${p.checks.map(c=>`<tr><td>${c.id}</td><td>${esc(c.name)}</td><td>${chip(c.result)}</td><td>${esc(c.detail)}</td></tr>`).join('')}</table>`;
-async function state(){const{d}=await api('state');$('#trial').textContent=d.paid?'Signed receipts on':`Trial: ${d.runs} of ${d.cap} runs used`;$('#unlock').hidden=d.paid}
+async function state(){const{d}=await api('state');$('#trial').textContent=d.paid?'Signed receipts on':`Trial: ${d.runs} of ${d.cap} runs used`;$('#unlock').hidden=d.paid||!d.email;$('#af').hidden=!!d.email;$('#lo').hidden=!d.email;$('#acct').textContent=d.email||''}
+const auth=async p=>{const{s,d}=await api('auth/'+p,{email:$('#em').value,password:$('#pw').value});$('#amsg').textContent=s===200?'':(d.error||'Failed');$('#pw').value='';state()};
+$('#li').onclick=()=>auth('login');$('#su').onclick=()=>auth('signup');$('#lo').onclick=async()=>{await api('auth/logout',{});$('#out').innerHTML='';state()};
 $('#pre').onclick=async()=>{const{d}=await api('plan',o());$('#out').innerHTML=`<h3>Plan check</h3>${pre(d)}<p>${d.ok?'This plan is allowed to run.':'This plan would be rejected. Nothing runs.'}</p>`};
 $('#go').onclick=async()=>{const{s,d}=await api('run',o());if(s===402){$('#out').innerHTML='<p class="BLOCKED">Trial run limit reached. Unlock to keep running.</p>';return}
  last=d.receipt;state();let h=`<p class="status ${d.status}">${d.status}</p>`;
