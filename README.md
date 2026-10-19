@@ -24,3 +24,9 @@ Generate a key: `node -e "console.log(require('crypto').generateKeyPairSync('ed2
 
 ## Benchmark
 `npm run bench` compares the Dotonomy runtime with two SIMULATED plain-agent baselines on 8 cases (ambiguity, stale data, permission, confidential data to external model, injection, no match, malformed tool output). The baselines are rule-coded, so the result validates the harness only. To make it evidence, replace `agent()` in bench.js with a real LLM tool-calling agent using the same fixtures, run each case many times, and report variance.
+
+### Real-LLM baseline
+    export ANTHROPIC_API_KEY=sk-ant-...        # never commit this; .env is git-ignored
+    npm run bench:llm -- --runs 10             # writes bench-llm-results.json
+    npm run bench:llm -- --mock                # tests the harness without a key (numbers are meaningless)
+Cases C5 and C8 do not apply to an LLM baseline. Set pass/fail thresholds BEFORE running.
