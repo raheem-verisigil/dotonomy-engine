@@ -32,7 +32,7 @@ export const DOTS={
   run:(v,p)=>{const h=p.hint.toLowerCase();const m=FIX.events.filter(e=>e.id===p.hint||(h&&e.client.toLowerCase().includes(h)));
    if(m.length!==1)return{ok:false,code:m.length?'AMBIGUOUS_MATCH':'NO_MATCH',candidates:m.map(e=>e.title)};
    return{ok:true,value:m[0],src:[{id:'cal:'+m[0].id}]}}},
- 'crm.get_account':{version:'1.0.0',effect:'read',perms:['crm.read'],ins:['Meeting'],out:'Account',accepts:{Meeting:['client']},forbid:[],labels:['business_contact','confidential'],
+ 'crm.get_account':{version:'1.0.0',effect:'read',perms:['crm.read'],ins:['Meeting'],out:'Account',extra:['internal_margin'],accepts:{Meeting:['client']},forbid:[],labels:['business_contact','confidential'],
   run:v=>{const a=FIX.crm[v.Meeting.client];return a?{ok:true,value:a,src:[{id:'crm:'+a.id}]}:{ok:false,code:'NO_ACCOUNT',candidates:[]}}},
  'mail.search_related':{version:'1.0.0',effect:'read',perms:['mail.read'],ins:['Meeting','Account'],out:'Mail',accepts:{Meeting:['client'],Account:['id']},forbid:[],labels:['confidential'],
   run:v=>{const all=FIX.mail.filter(m=>m.client===v.Meeting.client),items=all.filter(m=>age(m.date)<=180);
@@ -48,9 +48,20 @@ export const CONTRACT={id:'client.meeting_readiness',version:'0.1.0',purpose:'me
  requirements:[{id:'R1',text:'Correct meeting identified',dot:'calendar.find_meeting'},{id:'R2',text:'Account identified',dot:'crm.get_account'},
  {id:'R3',text:'Interactions checked (absence is recorded)',dot:'mail.search_related'},{id:'R4',text:'Sources fresh (CRM within 24h)',dot:'crm.get_account'},
  {id:'R5',text:'Every factual claim has a source',dot:'brief.validate'},{id:'R6',text:'Zero write actions'}]};
+const T={Meeting:{id:'string',title:'string',client:'string',start:'string',attendees:'array'},Account:{id:'string',name:'string',stage:'string',opps:'array',updated:'string'},Mail:{items:'array',staleExcluded:'number'},Docs:{items:'array'},Brief:{claims:'array',gaps:'array'},Validation:{unsupported:'array'}};
+const ty=v=>Array.isArray(v)?'array':typeof v;
+export function checkOutput(dot,r){const sch=T[dot.out];if(!r||typeof r.value!=='object'||r.value===null)return'output is not an object';
+ for(const[k,t]of Object.entries(sch))if(ty(r.value[k])!==t)return`field ${k} must be ${t}`;
+ const extra=Object.keys(r.value).filter(k=>!(k in sch)&&!(dot.extra||[]).includes(k));if(extra.length)return`undeclared field(s): ${extra.join(', ')}`;
+ if(!Array.isArray(r.src)||r.src.some(x=>!x||typeof x.id!=='string'||!x.id))return'malformed evidence references';return null}
+export function validateManifest(id,d){const e=[];['version','effect','perms','ins','out','accepts','forbid','labels','run'].forEach(k=>{if(d[k]===undefined)e.push('missing '+k)});
+ if(d.effect&&!EFF.includes(d.effect))e.push('unknown effect '+d.effect);if(d.effect&&EFF.indexOf(d.effect)>2&&!d.compensation)e.push('write Dot needs a compensation entry');
+ if(d.out&&!T[d.out])e.push('unknown output type '+d.out);if(d.labels&&d.labels.some(l=>!['public','business_contact','confidential','gov_id'].includes(l)))e.push('unknown label');return e}
+export function registerDot(reg,id,d){const e=validateManifest(id,d);if(e.length)throw new Error(`Rejected ${id}: ${e.join('; ')}`);reg[id]=d;return reg}
+Object.entries(DOTS).forEach(([id,d])=>{const e=validateManifest(id,d);if(e.length)throw new Error(`Core Dot ${id} invalid: ${e.join('; ')}`)});
 const TEMPLATE=[['s1','calendar.find_meeting',[]],['s2','crm.get_account',['s1']],['s3','mail.search_related',['s1','s2']],['s4','docs.search_related',['s2']],['s5','brief.compose',['s1','s2','s3','s4']],['s6','brief.validate',['s5']]];
 export function buildPlan(o={}){const p=TEMPLATE.map(([id,dot,deps])=>({id,dot,deps,ext:dot==='brief.compose'&&!!o.externalModel}));if(o.injectSend)p.push({id:'s7',dot:'mail.send',deps:['s5'],ext:false});return p}
-export function preflight(plan,grants){const out=[],by=Object.fromEntries(plan.map(s=>[s.id,s])),reg=s=>DOTS[s.dot];
+export function preflight(plan,grants,REG=DOTS){const out=[],by=Object.fromEntries(plan.map(s=>[s.id,s])),reg=s=>REG[s.dot];
  const add=(id,name,bad)=>out.push({id,name,result:bad.length?'fail':'pass',detail:bad.join('; ')||'ok'});
  add('P8','Every Dot is registered and trusted',plan.filter(s=>!reg(s)).map(s=>`${s.dot} is not in the registry`));
  const ok=plan.filter(reg);
@@ -62,19 +73,21 @@ export function preflight(plan,grants){const out=[],by=Object.fromEntries(plan.m
  add('P5','Effect ceiling respected (draft)',ok.filter(s=>EFF.indexOf(reg(s).effect)>EFF.indexOf(CONTRACT.maxEffect)).map(s=>`${s.dot} is ${reg(s).effect}`));
  add('P7','Every hard requirement has an evidence path',CONTRACT.requirements.filter(r=>r.dot&&!plan.some(s=>s.dot===r.dot)).map(r=>r.id));
  return{ok:out.every(c=>c.result==='pass'),checks:out}}
-export function execute(plan,hint){const D={},inv=[],known=[];
- for(const s of plan){const dot=DOTS[s.dot],view={},recv={};
+export function execute(plan,hint,REG=DOTS){const D={},inv=[],known=[];
+ for(const s of plan){const dot=REG[s.dot],view={},recv={};
   for(const d of s.deps){const x=D[d],f=dot.accepts[x.type]||[];view[x.type]={_src:x.src.map(q=>q.id)};f.forEach(k=>view[x.type][k]=x.value[k]);recv[x.type]=f}
-  const r=dot.run(view,{hint,known});inv.push({step:s.id,dot:s.dot,version:dot.version,effect:dot.effect,received:recv,ok:r.ok});
+  let r;try{r=dot.run(view,{hint,known})}catch{r={ok:false,code:'E_DOT_ERROR',candidates:[]}}
+  if(r.ok){const bad=checkOutput(dot,r);if(bad)r={ok:false,code:'E_OUTPUT_INVALID',candidates:[bad]}}
+  inv.push({step:s.id,dot:s.dot,version:dot.version,effect:dot.effect,received:recv,ok:r.ok});
   if(!r.ok)return{halted:{step:s.id,dot:s.dot,code:r.code,candidates:r.candidates},inv,D};
   D[s.id]={type:dot.out,value:r.value,src:r.src,labels:lab(dot.labels,s.deps.flatMap(d=>D[d].labels)),by:{dot:s.dot,version:dot.version}};
   r.src.forEach(q=>known.push(q.id))}
  return{inv,D}}
 export function evaluate(res){const R=[];const q=(i,state,note)=>R.push({id:i,text:CONTRACT.requirements[i-1].text,state,note:note||''});
  const rs=(id,s,n)=>R.push({id,text:CONTRACT.requirements.find(r=>r.id===id).text,state:s,note:n||''});
- if(res.halted){const amb=res.halted.code==='AMBIGUOUS_MATCH';
-  ['R1','R2','R3','R4','R5','R6'].forEach(id=>rs(id,id==='R1'?(amb?'CONFLICTED':'FAILED'):'UNKNOWN',id==='R1'?`${res.halted.code}: ${(res.halted.candidates||[]).join(' | ')||'none'}`:''));
-  return{reqs:R,status:'BLOCKED',warnings:[`Stopped at ${res.halted.dot}: ${res.halted.code}. Ask the user to choose.`]}}
+ if(res.halted){const h=res.halted,amb=h.code==='AMBIGUOUS_MATCH',soft=['AMBIGUOUS_MATCH','NO_MATCH','NO_ACCOUNT'].includes(h.code);
+  CONTRACT.requirements.forEach(r=>rs(r.id,r.dot===h.dot?(amb?'CONFLICTED':'FAILED'):'UNKNOWN',r.dot===h.dot?`${h.code}: ${(h.candidates||[]).join(' | ')||'none'}`:''));
+  return{reqs:R,status:soft?'BLOCKED':'FAILED',warnings:[`Stopped at ${h.dot}: ${h.code}.${soft?' Ask the user to choose.':' Output rejected by the runtime.'}`]}}
  const D=res.D,crm=D.s2.value,mail=D.s3.value,stale=age(crm.updated)>1;
  rs('R1','SATISFIED');rs('R2','SATISFIED');rs('R3','SATISFIED',mail.items.length?`${mail.items.length} email(s) found`:'supported absence: query completed, none found');
  rs('R4',stale?'STALE':'SATISFIED',stale?`CRM record is ${age(crm.updated).toFixed(1)} days old`:'');
