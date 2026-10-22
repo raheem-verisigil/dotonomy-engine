@@ -9,10 +9,13 @@ export const FIX={
  events:[{id:'ev1',title:'Northstar quarterly review',client:'Northstar',start:ago(-1),attendees:['Ada Obi (CFO)','Tunde Bello (Ops)']},
   {id:'ev2',title:'Acme intro call',client:'Acme',start:ago(-1),attendees:['Kemi A.']},
   {id:'ev3',title:'Acme pricing session',client:'Acme',start:ago(-2),attendees:['Kemi A.']},
-  {id:'ev4',title:'Globex check-in',client:'Globex',start:ago(-1),attendees:['J. Park']}],
- crm:{Northstar:{id:'acc_88',name:'Northstar Ltd',stage:'Negotiation',opps:['Platform renewal (NGN 48M)'],updated:ago(.25),internal_margin:'31%'},
-  Globex:{id:'acc_91',name:'Globex',stage:'Qualified',opps:['Pilot (NGN 6M)'],updated:ago(5),internal_margin:'22%'}},
+  {id:'ev4',title:'Globex check-in',client:'Globex',start:ago(-1),attendees:['J. Park']},
+  {id:'ev5',title:'Horizon Global renewal review',client:'Horizon',start:ago(-1),attendees:['M. Reyes (VP Procurement)']}],
+ crm:{Northstar:{id:'acc_88',name:'Northstar Ltd',stage:'Negotiation',opps:['Platform renewal ($240k)'],arr:240000,updated:ago(.25),internal_margin:'31%'},
+  Globex:{id:'acc_91',name:'Globex',stage:'Qualified',opps:['Pilot ($60k)'],arr:60000,updated:ago(5),internal_margin:'22%'},
+  Horizon:{id:'acc_77',name:'Horizon Global',stage:'Renewal',opps:['Annual renewal ($1.2M)'],arr:1200000,updated:ago(.1),internal_margin:'27%'}},
  mail:[{id:'m1',client:'Northstar',date:ago(17),subject:'Renewal terms',snippet:'Asked for a 12-month term and a revised SLA.'},
+  {id:'m5',client:'Horizon',date:ago(3),subject:'Budget update',snippet:'Buyer revised budget ceiling down to $850,000.',budget:850000},
   {id:'m2',client:'Northstar',date:ago(240),subject:'Old onboarding note',snippet:'Onboarding completed.'}],
  docs:[{id:'d1',client:'Northstar',title:'Renewal proposal v2',modified:ago(21)}]};
 export const RESTRICTED=['confidential','gov_id'];
@@ -22,6 +25,7 @@ function compose(v){const C=[],f=(text,cites)=>C.push({kind:'fact',text,cites});
  f(`Meeting: ${v.Meeting.title}, ${v.Meeting.start.slice(0,16).replace('T',' ')} UTC.`,v.Meeting._src);
  f(`Attendees: ${v.Meeting.attendees.join(', ')}.`,v.Meeting._src);
  f(`${v.Account.name} is at stage "${v.Account.stage}". Open: ${v.Account.opps.join('; ')}.`,v.Account._src);
+ v.Mail.items.filter(m=>m.budget!=null&&m.budget!==v.Account.arr).forEach(m=>f(`Conflict: CRM lists ARR $${v.Account.arr.toLocaleString('en-US')}, but email ${day(m.date)} states a budget ceiling of $${m.budget.toLocaleString('en-US')}. Both are shown; nothing was averaged or chosen.`,[v.Account._src[0],'mail:'+m.id]));
  if(v.Mail.items.length)v.Mail.items.forEach(m=>f(`Email ${day(m.date)} "${m.subject}": ${m.snippet}`,['mail:'+m.id]));else f('No related email in the last 180 days (query completed).',[v.Mail._src[0]]);
  if(v.Docs.items.length)v.Docs.items.forEach(d=>f(`Document "${d.title}", modified ${day(d.modified)}.`,['doc:'+d.id]));else f('No related documents found (query completed).',[v.Docs._src[0]]);
  C.push({kind:'suggestion',text:'Suggested: confirm next steps on the open opportunity.',cites:[]});
@@ -41,14 +45,14 @@ export const DOTS={
   run:v=>{const items=FIX.docs.filter(d=>v.Account.name.startsWith(d.client));
    return{ok:true,value:{items},src:[{id:'qry:docs:'+v.Account.id},...items.map(d=>({id:'doc:'+d.id}))]}}},
  'brief.compose':{version:'1.0.0',effect:'draft',perms:[],ins:['Meeting','Account','Mail','Docs'],out:'Brief',
-  accepts:{Meeting:['title','start','attendees'],Account:['name','stage','opps'],Mail:['items','staleExcluded'],Docs:['items']},forbid:['gov_id'],labels:[],run:compose},
+  accepts:{Meeting:['title','start','attendees'],Account:['name','stage','opps','arr'],Mail:['items','staleExcluded'],Docs:['items']},forbid:['gov_id'],labels:[],run:compose},
  'brief.validate':{version:'1.0.0',effect:'compute',perms:[],ins:['Brief'],out:'Validation',accepts:{Brief:['claims']},forbid:[],labels:[],
   run:(v,p)=>({ok:true,value:{unsupported:v.Brief.claims.filter(c=>c.kind==='fact'&&(!c.cites.length||c.cites.some(x=>!p.known.includes(x)))).map(c=>c.text)},src:[]})}};
 export const CONTRACT={id:'client.meeting_readiness',version:'0.1.0',purpose:'meeting_preparation',maxEffect:'draft',
  requirements:[{id:'R1',text:'Correct meeting identified',dot:'calendar.find_meeting'},{id:'R2',text:'Account identified',dot:'crm.get_account'},
  {id:'R3',text:'Interactions checked (absence is recorded)',dot:'mail.search_related'},{id:'R4',text:'Sources fresh (CRM within 24h)',dot:'crm.get_account'},
- {id:'R5',text:'Every factual claim has a source',dot:'brief.validate'},{id:'R6',text:'Zero write actions'}]};
-const T={Meeting:{id:'string',title:'string',client:'string',start:'string',attendees:'array'},Account:{id:'string',name:'string',stage:'string',opps:'array',updated:'string'},Mail:{items:'array',staleExcluded:'number'},Docs:{items:'array'},Brief:{claims:'array',gaps:'array'},Validation:{unsupported:'array'}};
+ {id:'R5',text:'Every factual claim has a source',dot:'brief.validate'},{id:'R6',text:'Zero write actions'},{id:'R7',text:'Sources do not contradict each other',dot:'mail.search_related'}]};
+const T={Meeting:{id:'string',title:'string',client:'string',start:'string',attendees:'array'},Account:{id:'string',name:'string',stage:'string',opps:'array',arr:'number',updated:'string'},Mail:{items:'array',staleExcluded:'number'},Docs:{items:'array'},Brief:{claims:'array',gaps:'array'},Validation:{unsupported:'array'}};
 const ty=v=>Array.isArray(v)?'array':typeof v;
 export function checkOutput(dot,r){const sch=T[dot.out];if(!r||typeof r.value!=='object'||r.value===null)return'output is not an object';
  for(const[k,t]of Object.entries(sch))if(ty(r.value[k])!==t)return`field ${k} must be ${t}`;
@@ -93,14 +97,15 @@ export function evaluate(res){const R=[];const q=(i,state,note)=>R.push({id:i,te
  rs('R4',stale?'STALE':'SATISFIED',stale?`CRM record is ${age(crm.updated).toFixed(1)} days old`:'');
  const bad=D.s6.value.unsupported;rs('R5',bad.length?'FAILED':'SATISFIED',bad.length?`${bad.length} unsupported`:'');
  rs('R6',res.inv.every(i=>EFF.indexOf(i.effect)<=2)?'SATISFIED':'FAILED');
- const st=R.some(r=>r.state==='FAILED')?'FAILED':R.some(r=>r.state==='STALE')?'CONDITIONAL':'SATISFIED';
- return{reqs:R,status:st,warnings:[...(D.s5.value.gaps||[]),...(stale?['CRM data is stale; verify before the meeting.']:[])]}}
-export function makeReceipt({runId,plan,pre,res,ev,result,prev,priv,keyId}){
+ const cf=mail.items.filter(m=>m.budget!=null&&m.budget!==crm.arr);rs('R7',cf.length?'CONFLICTED':'SATISFIED',cf.length?`CRM ARR ${crm.arr} vs email budget ${cf[0].budget}`:'');
+ const st=R.some(r=>r.state==='FAILED')?'FAILED':R.some(r=>r.state==='STALE'||r.state==='CONFLICTED')?'CONDITIONAL':'SATISFIED';
+ return{reqs:R,status:st,warnings:[...(D.s5.value.gaps||[]),...(cf.length?['Sources disagree on budget. Verify before the meeting.']:[]),...(stale?['CRM data is stale; verify before the meeting.']:[])]}}
+export function makeReceipt({runId,plan,pre,res,ev,result,prev,priv,keyId,sample}){
  const body={receipt_id:'rcpt_'+runId,run_id:runId,contract:{id:CONTRACT.id,version:CONTRACT.version},created_at:new Date().toISOString(),plan_hash:sha(canon(plan)),
   policy_decisions:pre.checks.map(c=>({check:c.id,result:c.result})),dots:res.inv.map(i=>({id:i.dot,version:i.version,step:i.step,effect:i.effect})),
   datums:Object.entries(res.D||{}).map(([step,d])=>({step,type:d.type,labels:d.labels,hash:sha(canon(d.value))})),
   requirements:ev.reqs.map(({id,state})=>({id,state})),outcome_status:ev.status,warnings:ev.warnings,result_hash:sha(canon(result)),
-  prev_receipt_hash:prev||null,signed:!!priv,key_id:keyId,signature:null};
+  prev_receipt_hash:prev||null,signed:!!priv,sample:!!sample,key_id:keyId,signature:null};
  if(priv){const {signature,...rest}=body;body.signature=crypto.sign(null,Buffer.from(canon(rest)),priv).toString('base64')}
  return body}
 export function verifyReceipt(r,pub){if(!r||!r.signature)return{valid:false,reason:'UNSIGNED_PREVIEW'};

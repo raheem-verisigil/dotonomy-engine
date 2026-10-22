@@ -30,3 +30,6 @@ Generate a key: `node -e "console.log(require('crypto').generateKeyPairSync('ed2
     npm run bench:llm -- --runs 10             # writes bench-llm-results.json
     npm run bench:llm -- --mock                # tests the harness without a key (numbers are meaningless)
 Cases C5 and C8 do not apply to an LLM baseline. Set pass/fail thresholds BEFORE running.
+
+## Website (v0.3)
+`public/index.html` is the marketing site, built from the Stitch design by `tools/build_site.py` (`python3 tools/build_site.py tools/stitch-source.html`). It calls the real engine: the live demo runs `/api/run` with `sample:true` (signed, marked as a sample, unmetered, not stored, rate-limited), the verifier calls `/api/verify`, and the trial form calls `/api/auth/signup` then opens `/app.html`. `node verify-cli.js receipt.json public-key.pem` checks a receipt offline (`/api/public-key` serves the key). Pages `privacy.html` and `terms.html` are drafts pending legal review. Source-conflict detection (requirement R7) is live. Tailwind still loads from its CDN; compile it before production.

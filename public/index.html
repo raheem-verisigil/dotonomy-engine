@@ -1,65 +1,952 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dotonomy: work product with proof</title>
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_standard" name="shell-type"/>
+<title>Dotonomy — Your Meeting Brief, With Proof of Where Every Fact Came From</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#eef1f4;--p:#fff;--t:#16202b;--m:#5b6875;--line:#cfd6dd;--ok:#0b7a5a;--warn:#a86400;--bad:#b3261e;--ink:#10304a}
-@media(prefers-color-scheme:dark){:root{--bg:#0e141a;--p:#151d26;--t:#e7edf3;--m:#93a1af;--line:#2b3744;--ok:#3ccf9f;--warn:#e0a030;--bad:#ff7b72;--ink:#8cc4ee}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
-header{padding:28px 20px 10px;max-width:1040px;margin:auto}h1{font:600 30px/1.15 Georgia,serif;margin:0 0 6px;color:var(--ink)}header p{margin:0;color:var(--m);max-width:62ch}
-.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--m)}
-nav{max-width:1040px;margin:12px auto 0;padding:0 20px;display:flex;gap:4px;border-bottom:1px solid var(--line)}
-nav button{background:none;border:0;padding:10px 14px;font:inherit;color:var(--m);cursor:pointer;border-bottom:2px solid transparent}nav button[aria-selected=true]{color:var(--t);border-color:var(--ink);font-weight:600}
-main{max-width:1040px;margin:18px auto;padding:0 20px 60px}.grid{display:grid;grid-template-columns:300px 1fr;gap:20px}@media(max-width:800px){.grid{grid-template-columns:1fr}}
-.card{background:var(--p);border:1px solid var(--line);border-radius:6px;padding:16px}h3{margin:0 0 10px;font-size:15px}
-label{display:block;margin:8px 0;font-size:14px}input[type=text],select{width:100%;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--t);font:inherit}
-.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}button.b{padding:9px 14px;border-radius:4px;border:1px solid var(--ink);background:var(--ink);color:var(--p);font:inherit;cursor:pointer}button.b.alt{background:none;color:var(--ink)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-table{width:100%;border-collapse:collapse;font-size:13.5px}td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-.chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600;border:1px solid currentColor}
-.pass,.SATISFIED,.SUPPORTED{color:var(--ok)}.fail,.FAILED,.BLOCKED,.CONFLICTED{color:var(--bad)}.CONDITIONAL,.STALE{color:var(--warn)}.UNKNOWN{color:var(--m)}
-.cite{font:11px ui-monospace,monospace;color:var(--m);border:1px solid var(--line);border-radius:3px;padding:0 4px;margin-left:4px}
-.status{font:600 22px Georgia,serif;margin:0 0 8px}.sug{color:var(--m);font-style:italic}
-pre.receipt{font:12px/1.45 ui-monospace,monospace;background:var(--bg);border:1px dashed var(--m);padding:12px;overflow:auto;max-height:340px;white-space:pre-wrap;word-break:break-all}
-.wm{border:1px dashed var(--warn);color:var(--warn);padding:6px 10px;border-radius:4px;font-size:13px;margin-bottom:10px}
-.af{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.af input{padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:var(--p);color:var(--t);font:inherit;width:190px}.dot{margin-bottom:12px}.dot code{font:13px ui-monospace,monospace}.empty{color:var(--m)}
-</style></head><body>
-<header><h1>Dotonomy</h1><p>Ask for a result. Dotonomy checks what it is allowed to do before it runs, then hands back the work with a receipt you can verify.</p>
-<div class="bar"><span id="trial">Loading</span><span id="acct"></span><form id="af" class="af" onsubmit="return false"><input id="em" type="email" placeholder="email" autocomplete="username" aria-label="Email"><input id="pw" type="password" placeholder="password, 10+ characters" autocomplete="current-password" aria-label="Password"><button class="b alt" id="li" type="button">Log in</button><button class="b alt" id="su" type="button">Sign up</button><span id="amsg" class="BLOCKED"></span></form><button class="b alt" id="lo" hidden>Log out</button><button class="b alt" id="unlock" hidden>Unlock signed receipts (demo)</button></div></header>
-<nav role="tablist"><button role="tab" aria-selected="true" data-t="run">Prepare a meeting</button><button role="tab" aria-selected="false" data-t="dots">Capabilities</button><button role="tab" aria-selected="false" data-t="rcpt">My receipts</button></nav>
-<main>
-<section id="run"><div class="grid"><div class="card"><h3>Request</h3>
-<label>Client or meeting<select id="hint"><option>Northstar</option><option>Acme</option><option>Globex</option></select></label>
-<h3 style="margin-top:14px">Permissions you grant</h3>
-<label><input class="g" type="checkbox" value="calendar.read" checked> Read calendar</label><label><input class="g" type="checkbox" value="crm.read" checked> Read CRM</label>
-<label><input class="g" type="checkbox" value="mail.read" checked> Read email</label><label><input class="g" type="checkbox" value="docs.read" checked> Read documents</label>
-<h3 style="margin-top:14px">Try to break it</h3>
-<label><input id="ext" type="checkbox"> Send data to an external model</label><label><input id="snd" type="checkbox"> Add an unregistered "send email" step</label>
-<div class="row"><button class="b alt" id="pre">Check plan only</button><button class="b" id="go">Run</button></div></div>
-<div class="card" id="out"><p class="empty">Pick a client and select Run. Northstar succeeds, Acme is ambiguous, Globex has stale data. Then turn on a break-it option to see the plan rejected before anything runs.</p></div></div></section>
-<section id="dots" hidden></section><section id="rcpt" hidden></section></main>
-<script>
-const ws=localStorage.dnws||(localStorage.dnws=Math.random().toString(36).slice(2,12)),$=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const api=async(p,b)=>{const r=await fetch('/api/'+p,{method:b?'POST':'GET',headers:{'content-type':'application/json'},body:b?JSON.stringify(b):undefined});return{s:r.status,d:await r.json()}};
-const o=()=>({hint:$('#hint').value,grants:[...document.querySelectorAll('.g:checked')].map(x=>x.value),externalModel:$('#ext').checked,injectSend:$('#snd').checked});
-const chip=s=>`<span class="chip ${s}">${s}</span>`;let last=null;
-const pre=p=>`<table>${p.checks.map(c=>`<tr><td>${c.id}</td><td>${esc(c.name)}</td><td>${chip(c.result)}</td><td>${esc(c.detail)}</td></tr>`).join('')}</table>`;
-async function state(){const{d}=await api('state');$('#trial').textContent=d.paid?'Signed receipts on':`Trial: ${d.runs} of ${d.cap} runs used`;$('#unlock').hidden=d.paid||!d.email;$('#af').hidden=!!d.email;$('#lo').hidden=!d.email;$('#acct').textContent=d.email||''}
-const auth=async p=>{const{s,d}=await api('auth/'+p,{email:$('#em').value,password:$('#pw').value});$('#amsg').textContent=s===200?'':(d.error||'Failed');$('#pw').value='';state()};
-$('#li').onclick=()=>auth('login');$('#su').onclick=()=>auth('signup');$('#lo').onclick=async()=>{await api('auth/logout',{});$('#out').innerHTML='';state()};
-$('#pre').onclick=async()=>{const{d}=await api('plan',o());$('#out').innerHTML=`<h3>Plan check</h3>${pre(d)}<p>${d.ok?'This plan is allowed to run.':'This plan would be rejected. Nothing runs.'}</p>`};
-$('#go').onclick=async()=>{const{s,d}=await api('run',o());if(s===402){$('#out').innerHTML='<p class="BLOCKED">Trial run limit reached. Unlock to keep running.</p>';return}
- last=d.receipt;state();let h=`<p class="status ${d.status}">${d.status}</p>`;
- if(d.watermark)h+='<div class="wm">Trial preview: this receipt is unsigned. Unlock to get a signed, verifiable one.</div>';
- h+=`<h3>Plan check</h3>${pre(d.preflight)}`;
- if(d.halted)h+=`<h3>Stopped</h3><p>${esc(d.halted.code)}. ${(d.halted.candidates||[]).map(esc).join(' | ')}. Choose one and run again.</p>`;
- if(d.brief?.claims)h+=`<h3>Brief</h3><ul>${d.brief.claims.map(c=>c.kind==='fact'?`<li>${esc(c.text)}${c.cites.map(x=>`<span class="cite">${esc(x)}</span>`).join('')}</li>`:`<li class="sug">${esc(c.text)}</li>`).join('')}</ul>`;
- if(d.warnings.length)h+=`<h3>Gaps</h3><ul>${d.warnings.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`;
- h+=`<h3>Requirements</h3><table>${d.requirements.map(r=>`<tr><td>${r.id}</td><td>${esc(r.text)}</td><td>${chip(r.state)}</td><td>${esc(r.note)}</td></tr>`).join('')}</table>`;
- h+=`<h3 style="margin-top:14px">Receipt</h3><pre class="receipt">${esc(JSON.stringify(d.receipt,null,1))}</pre><div class="row"><button class="b alt" id="vf">Verify receipt</button><button class="b alt" id="tp">Change one field, then verify</button></div><p id="vr"></p>`;
- $('#out').innerHTML=h;
- const v=async r=>{const{d}=await api('verify',{receipt:r});$('#vr').innerHTML=`${chip(d.valid?'pass':'fail')} ${esc(d.reason)}`};
- $('#vf').onclick=()=>v(last);$('#tp').onclick=()=>{const t=structuredClone(last);t.outcome_status='SATISFIED';t.requirements[0].state='SATISFIED';t.warnings=[];t.run_id+='x';v(t)}};
-$('#unlock').onclick=async()=>{await api('workspace/unlock',{});state()};
-document.querySelectorAll('nav button').forEach(b=>b.onclick=async()=>{document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));['run','dots','rcpt'].forEach(t=>$('#'+t).hidden=t!==b.dataset.t);
- if(b.dataset.t==='dots'){const{d}=await api('dots');$('#dots').innerHTML=d.map(x=>`<div class="card dot"><code>${x.id}</code> v${x.version} ${chip(x.effect==='read'?'pass':'CONDITIONAL')} ${x.effect}<br>Needs: ${x.permissions.join(', ')||'none'}. Takes: ${x.inputs.join(', ')||'user request'}. Returns: ${x.output}. Labels: ${x.labels.join(', ')||'none'}.<br>Fields it may receive: ${esc(JSON.stringify(x.accepts))}</div>`).join('')}
- if(b.dataset.t==='rcpt'){const{d}=await api('receipts');$('#rcpt').innerHTML=d.length?`<div class="card"><table><tr><th>Receipt</th><th>Status</th><th>Signed</th><th>Time</th></tr>${d.map(r=>`<tr><td>${r.receipt_id}</td><td>${chip(r.outcome_status)}</td><td>${r.signed?'yes':'preview'}</td><td>${r.created_at.slice(0,19)}</td></tr>`).join('')}</table></div>`:'<p class="empty">No receipts yet. Run a meeting brief first.</p>'}});
-state();
-</script></body></html>
+    @layer base {
+      html, body { margin: 0; padding: 0; background-color: #090d14; color: #dfe2ee; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f131c; }
+    ::-webkit-scrollbar-thumb { background: #262a33; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3c4a42; }
+    .bg-grid-pattern {
+      background-size: 36px 36px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    .code-scroll::-webkit-scrollbar { height: 4px; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-variant": "#222733",
+            "on-primary-fixed": "#002113",
+            "surface-dim": "#0a0d14",
+            "on-tertiary": "#472a00",
+            "secondary": "#38bdf8",
+            "secondary-container": "#0369a1",
+            "surface-bright": "#2d3340",
+            "surface-tint": "#10b981",
+            "tertiary": "#f59e0b",
+            "surface-container-highest": "#282e3b",
+            "background": "#080c13",
+            "on-background": "#f1f5f9",
+            "outline": "#64748b",
+            "on-surface": "#f1f5f9",
+            "surface-container-lowest": "#05070b",
+            "primary-fixed": "#6ee7b7",
+            "surface": "#0c1018",
+            "primary-container": "#047857",
+            "on-primary-container": "#ecfdf5",
+            "surface-container-high": "#1e232e",
+            "surface-container-low": "#111520",
+            "surface-container": "#151a24",
+            "outline-variant": "#2a3342",
+            "primary": "#10b981",
+            "on-primary": "#002c1c",
+            "on-surface-variant": "#94a3b8",
+            "error": "#f87171",
+            "error-container": "#7f1d1d"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+<meta content="Dotonomy checks a plan before it runs and hands you a client meeting brief with a signed receipt showing where every fact came from." name="description"/><style>:focus-visible{outline:2px solid #4edea3;outline-offset:2px}input[type=checkbox]{accent-color:#4edea3}</style></head>
+<body class="bg-background font-sans text-on-surface antialiased selection:bg-primary/25 selection:text-primary">
+<!-- TOP NAVIGATION HEADER -->
+<header class="fixed top-0 left-0 w-full z-50 bg-[#090d14]/90 backdrop-blur-xl border-b border-outline-variant/60 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+<div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+<!-- Brand Logo + Identity -->
+<div class="flex items-center gap-6">
+<a aria-label="Dotonomy Home" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-primary rounded-lg" href="#">
+<div class="w-10 h-10 rounded-xl bg-[#0e1420] border border-outline-variant/80 p-1 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.12)] group-hover:border-primary/60 transition-all">
+<svg aria-label="Dotonomy" class="w-full h-full" role="img" viewbox="0 0 24 24"><circle cx="12" cy="12" fill="none" r="9" stroke="#4edea3" stroke-width="2"></circle><circle cx="12" cy="12" fill="#4edea3" r="3.5"></circle></svg>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-bold text-lg tracking-tight text-white group-hover:text-primary transition-colors">Dotonomy</span>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/25 font-semibold">BUILD v0.3</span>
+</div>
+<span class="text-[10px] font-mono tracking-wider text-on-surface-variant uppercase">Verified Outcome Layer</span>
+</div>
+</a>
+<!-- Desktop Primary Nav -->
+<nav aria-label="Main Navigation" class="hidden lg:flex items-center gap-1 ml-4 text-[13px] font-medium text-on-surface-variant">
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#contracts">Outcome Contracts</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#preflight-lifecycle">7-Gate Lifecycle</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#state-machine">Decoupled State</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#meeting-wedge">Client Brief Wedge</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#proves-section">Receipt Scope</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#receipt-verifier">Receipt Verifier</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#billing">Commercial Model</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#status">What's Live</a><a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="/app.html">Open App</a></nav>
+</div>
+<!-- Right CTAs -->
+<div class="flex items-center gap-3">
+<div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#0d121c] border border-outline-variant/60 font-mono text-[11px] text-on-surface-variant">
+<span aria-hidden="true" class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#10b981]"></span>
+<span>ED25519-SIGNED RECEIPTS</span>
+</div>
+<a class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant text-[13px] font-medium text-white hover:bg-surface-container-high transition-colors" href="#receipt-verifier">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<span>Verify a Receipt</span>
+</a>
+<a class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-semibold text-[13px] hover:bg-primary-fixed shadow-[0_0_16px_rgba(16,185,129,0.3)] transition-all" href="#simulator">
+<span>Try Meeting Brief</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</header>
+<main class="w-full pt-16 bg-background">
+<!-- HERO SECTION: CLEAR, HONEST BUYER POSITIONING -->
+<section class="relative w-full overflow-hidden border-b border-outline-variant/40 bg-surface-container-lowest pt-20 pb-24 lg:pt-28 lg:pb-32 bg-grid-pattern">
+<div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[360px] bg-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
+<div class="absolute top-1/3 right-10 w-[400px] h-[300px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
+<!-- Baseline Tagline -->
+<div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-container-low border border-outline-variant/80 shadow-inner mb-6">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-mono text-xs uppercase tracking-wider text-slate-300">Deterministic Audit Ledgers • Sentence-Level Citations • Read-Only Enforced</span>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-highest text-secondary border border-secondary/30">EARLY BUILD</span>
+</div>
+<!-- Corrected Hero Headline (Buyer-Focused) -->
+<h1 class="text-4xl sm:text-6xl lg:text-[62px] font-bold text-white tracking-tight leading-[1.15] max-w-5xl">
+          Your Meeting Brief, With Proof of Where Every Fact Came From.
+        </h1>
+<!-- Corrected Subheadline (Clear, Honest) -->
+<p class="mt-6 max-w-3xl text-lg sm:text-xl text-on-surface-variant font-normal leading-relaxed">Dotonomy checks a plan, runs read-only steps, and verifies each fact against its source before handing you a client brief. Today it runs on built-in sample data; live connectors are next.<span class="text-white font-medium">Settle-on-Satisfaction:</span>in the planned billing model you only pay when the agreed acceptance criteria are satisfied. Billing is not live yet.</p>
+<!-- Corrected CTAs -->
+<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+<a class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.35)] transition-all" href="#simulator">
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+<span>Try Client Meeting Brief</span>
+</a>
+<a class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-surface-container-high border border-outline-variant text-white font-medium text-sm hover:bg-surface-bright transition-all" href="#receipt-verifier">
+<span class="material-symbols-outlined text-[20px] text-secondary">verified</span>
+<span>Verify an Outcome Receipt</span>
+</a>
+<a class="inline-flex items-center gap-2 px-4 py-3.5 text-on-surface-variant hover:text-white text-sm font-medium transition-colors" href="#state-machine">
+<span>Inspect Two-Tier State Machine</span>
+<span class="material-symbols-outlined text-[18px]">east</span>
+</a>
+</div>
+<!-- Honest Build Metrics (Replaced Hyper-Inflated Badges) -->
+<div class="mt-16 w-full max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-3 p-3 rounded-2xl bg-surface-container-low/90 border border-outline-variant/70 backdrop-blur-md">
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
+<span class="font-mono text-2xl font-bold text-primary">7 Gates</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Preflight Policy Checks</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
+<span class="font-mono text-2xl font-bold text-secondary">Two-Tier</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Decoupled State Machine</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
+<span class="font-mono text-2xl font-bold text-amber-400">Ed25519</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Public-Key Signatures</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
+<span class="font-mono text-2xl font-bold text-white">$0.00</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Planned fee if blocked</span>
+</div>
+</div>
+</div>
+</section>
+<!-- BUILT ARCHITECTURE & SECURITY BASELINE (TRUTHFUL & MEASURED) -->
+<section class="w-full bg-surface-container-lowest py-10 border-b border-outline-variant/40">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[22px] shrink-0">key</span>
+<div>
+<h4 class="text-xs font-bold text-white font-mono uppercase">Ed25519 Asymmetric Verification</h4>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Receipts are signed with a private key. The public key is served over HTTPS so anyone can check a receipt.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px] shrink-0">lock</span>
+<div>
+<h4 class="text-xs font-bold text-white font-mono uppercase">Read-Only By Construction</h4>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">This build is read-only and runs on built-in sample data. It holds no write access to any outside system.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-400 text-[22px] shrink-0">timer</span>
+<div>
+<h4 class="text-xs font-bold text-white font-mono uppercase">Purpose-Bound Context</h4>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Each Dot receives only the fields it declares, and sensitivity labels follow the data through every step.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
+<span class="material-symbols-outlined text-emerald-400 text-[22px] shrink-0">gavel</span>
+<div>
+<h4 class="text-xs font-bold text-white font-mono uppercase">Data Minimization</h4>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Passwords are scrypt-hashed and data is kept in Postgres. A formal data-protection review is still pending.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ARCHITECTURAL PARADIGM CONTRAST -->
+<section class="w-full bg-surface-container-low/50 py-20 border-b border-outline-variant/50" id="architecture">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-12">
+<div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ SYSTEMS AUDIT &amp; PARADIGM SHIFT ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            Why Probabilistic Automation Collapses in Client-Facing Work
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            Standard enterprise copilots query LLMs with broad credentials and hope for coherence. Dotonomy treats autonomous briefings as typed contracts guarded by strict compiler preflights.
+          </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Paradigm A: Probabilistic Copilots -->
+<div class="rounded-2xl bg-surface-container-low border border-red-900/40 p-8 flex flex-col justify-between relative overflow-hidden shadow-lg">
+<div class="absolute top-0 right-0 px-3 py-1 bg-red-950/80 border-b border-l border-red-700/50 text-red-300 font-mono text-[10px] uppercase font-semibold tracking-wider">
+              INDUSTRY FAILURE MODE
+            </div>
+<div>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-xl bg-red-950/40 border border-red-700/40 flex items-center justify-center text-red-400">
+<span class="material-symbols-outlined text-[22px]">error</span>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white">Probabilistic Copilots &amp; Agents</h3>
+<span class="text-xs font-mono text-red-300/80">Unverified Prompt Chaining &amp; Shared Tokens</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex items-start gap-3">
+<span class="material-symbols-outlined text-red-400 text-[18px] shrink-0 mt-0.5">vpn_key_alert</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Ambient Master OAuth Privileges</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Agents run with permanent workspace tokens. A single prompt injection or loose tool parameter can inadvertently leak customer CRM history or write unintended meeting notes.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex items-start gap-3">
+<span class="material-symbols-outlined text-red-400 text-[18px] shrink-0 mt-0.5">query_stats</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Conflated Status &amp; Smooth Hallucinations</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">If the Python runtime exits with code 0, traditional tools declare success—even when the underlying CRM and email threads give conflicting renewal numbers.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex items-start gap-3">
+<span class="material-symbols-outlined text-red-400 text-[18px] shrink-0 mt-0.5">money_off</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Speculative Per-Token Invoicing</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">You pay for every reasoning loop, retried tool call, and hallucinated summary, absorbing 100% of the financial penalty when outputs cannot be cited in front of a client.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-4 border-t border-outline-variant/40 flex items-center justify-between text-xs font-mono">
+<span class="text-on-surface-variant">VERIFICATION AUDIT:</span>
+<span class="text-red-400 font-semibold">ZERO PROVENANCE TRAIL</span>
+</div>
+</div>
+<!-- Paradigm B: Dotonomy Outcome Contract Layer -->
+<div class="rounded-2xl bg-surface-container border border-primary/40 p-8 flex flex-col justify-between relative overflow-hidden shadow-2xl">
+<div class="absolute top-0 right-0 px-3 py-1 bg-emerald-950/80 border-b border-l border-primary/50 text-emerald-300 font-mono text-[10px] uppercase font-bold tracking-wider">
+              DOTONOMY PROTOCOL
+            </div>
+<div>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/40 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">verified_user</span>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white">Deterministic Outcome Contracts</h3>
+<span class="text-xs font-mono text-primary">Two-Tier Decoupled State &amp; Ed25519 Receipts</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="p-4 rounded-xl bg-surface-container-high/80 border border-primary/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">lock_clock</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Strict Read-Only Context Packs</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">No write scopes connected to external systems. Dots can only read. No write scopes exist anywhere in this build.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-high/80 border border-primary/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5">call_split</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Decoupled Operational vs. Outcome State</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">A clean tool run only proves Tier 1 (COMPLETED). If facts contradict or freshness policies fail, Tier 2 flags CONDITIONAL or BLOCKED, stopping false briefings.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-high/80 border border-primary/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-emerald-400 text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Settle-on-Satisfaction Billing</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Planned billing model: when a run is BLOCKED, CONDITIONAL or UNVERIFIED, the outcome fee is $0.00. Billing is not live yet.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-4 border-t border-primary/30 flex items-center justify-between text-xs font-mono">
+<span class="text-on-surface-variant">CRYPTOGRAPHIC PROOF:</span>
+<span class="text-primary font-semibold">ED25519 ASYMMETRIC SIGNATURE</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CORE PRIMITIVE: WHAT IS AN OUTCOME CONTRACT? -->
+<section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="contracts">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center max-w-3xl mx-auto mb-14">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ FORMAL SPECIFICATION ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">What is an Outcome Contract?</h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            An Outcome Contract is a declarative JSON/TypeScript specification that sets strict acceptance conditions, provenance requirements, data freshness horizons, and effect boundaries before an action begins.
+          </p>
+</div>
+<!-- 4 Pillars of an Outcome Contract -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+<div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant/60">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-3">
+<span class="material-symbols-outlined text-[20px]">schema</span>
+</div>
+<h3 class="text-sm font-bold text-white font-mono">1. Output Schema</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Rigid JSON Schema definitions. If an emitted brief deviates by a single field or key, preflight validation aborts.</p>
+</div>
+<div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant/60">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary mb-3">
+<span class="material-symbols-outlined text-[20px]">fact_check</span>
+</div>
+<h3 class="text-sm font-bold text-white font-mono">2. Citation Rules</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Every factual sentence must cite a source record ID. Uncited facts fail validation.</p>
+</div>
+<div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant/60">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-amber-400 mb-3">
+<span class="material-symbols-outlined text-[20px]">history_toggle_off</span>
+</div>
+<h3 class="text-sm font-bold text-white font-mono">3. Freshness Horizon</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Records older than their freshness limit trigger a CONDITIONAL status instead of a silent pass.</p>
+</div>
+<div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant/60">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-emerald-400 mb-3">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+</div>
+<h3 class="text-sm font-bold text-white font-mono">4. Effect Bounds</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Strict zero-write enforcement. Effects are declared per Dot and checked before running. Anything above draft level is rejected.</p>
+</div>
+</div>
+<!-- Code Block Spec -->
+<div class="rounded-2xl bg-[#0a0e16] border border-outline-variant/70 shadow-2xl overflow-hidden font-mono">
+<div class="px-6 py-3.5 bg-surface-container-high/60 border-b border-outline-variant/60 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+<span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+<span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+<span class="ml-3 text-xs text-slate-300 font-semibold tracking-wide">client.meeting_readiness v0.1</span>
+</div>
+<span class="text-[11px] text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/30">LIVE IN THE RUNTIME</span>
+</div>
+<div class="p-6 text-xs text-slate-300 leading-relaxed overflow-x-auto code-scroll">
+<pre>{
+  "outcome_id": "client.meeting_readiness",
+  "version": "0.1.0",
+  "purpose": "meeting_preparation",
+  "max_effect": "draft",
+  "requirements": [
+    "R1 correct meeting identified",
+    "R2 account identified",
+    "R3 interactions checked (absence is recorded)",
+    "R4 sources fresh (CRM within 24h)",
+    "R5 every factual claim has a source",
+    "R6 zero write actions",
+    "R7 sources do not contradict each other"
+  ],
+  "signature": "Ed25519"
+}</pre>
+</div>
+</div>
+</div>
+</section>
+<!-- THE 7-GATE PREFLIGHT & RUNTIME LIFECYCLE (ACCURATE & RIGID) -->
+<section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="preflight-lifecycle">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center max-w-3xl mx-auto mb-14">
+<div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ 7 STATIC PREFLIGHT GATES ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">The 7-Gate Preflight Verification Lifecycle</h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">Before anything runs, Dotonomy checks the whole plan against seven rules. If any check fails, nothing executes. Freshness and source conflicts are checked after the run.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3">
+<!-- Gate 1 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-primary/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-primary block mb-2">GATE 01</span>
+<h3 class="text-xs font-bold text-white">Registered Dots</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Every step is a Dot in the registry. Unregistered capabilities are rejected.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">REGISTRY</span>
+</div>
+<!-- Gate 2 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-secondary/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-secondary block mb-2">GATE 02</span>
+<h3 class="text-xs font-bold text-white">Permissions</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Every permission a Dot needs must be inside the grant you approved.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">PERMISSIONS</span>
+</div>
+<!-- Gate 3 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-primary/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-primary block mb-2">GATE 03</span>
+<h3 class="text-xs font-bold text-white">Type Match</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Each step's output type must equal the next step's input type.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">TYPES</span>
+</div>
+<!-- Gate 4 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-emerald-400/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-emerald-400 block mb-2">GATE 04</span>
+<h3 class="text-xs font-bold text-white">Data Labels</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">No forbidden sensitivity label may reach a Dot.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">DATA LABELS</span>
+</div>
+<!-- Gate 5 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-amber-400/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-amber-400 block mb-2">GATE 05</span>
+<h3 class="text-xs font-bold text-white">Model Boundary</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Confidential data may never reach an external model.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">NO LEAKS</span>
+</div>
+<!-- Gate 6 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-amber-400/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-amber-400 block mb-2">GATE 06</span>
+<h3 class="text-xs font-bold text-white">Effect Ceiling</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">No step above draft level is allowed. Writes are rejected.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">ZERO WRITES</span>
+</div>
+<!-- Gate 7 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-primary/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-primary block mb-2">GATE 07</span>
+<h3 class="text-xs font-bold text-white">Evidence Paths</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Every hard requirement needs a step that can produce its evidence.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">EVIDENCE</span>
+</div>
+</div>
+</div>
+</section>
+<!-- FUNDAMENTAL ARCHITECTURE: TWO-TIER STATE MACHINE DECOUPLING -->
+<section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="state-machine">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-12">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ THE CORE ENGINEERING INNOVATION ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            The Two-Tier State Machine Decoupling
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            The fatal flaw in modern automation is treating technical execution as factual truth. Dotonomy permanently decouples whether a process <span class="text-white font-medium">ran successfully</span> from whether its evidence <span class="text-white font-medium">satisfies acceptance standards</span>.
+          </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+<!-- Tier 1: Operational Run State -->
+<div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/70">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">dns</span>
+<h3 class="text-base font-bold text-white">Tier 1: Operational Run State</h3>
+</div>
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">INFRASTRUCTURE LAYER</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-6 leading-relaxed">Tracks the computational execution of data connectors, parsers, and prompt compilers.</p>
+<div class="space-y-3 font-mono text-xs">
+<div class="p-3 rounded-lg bg-surface-container/70 border border-outline-variant/40 flex items-center justify-between">
+<span class="text-emerald-400 font-bold">COMPLETED</span>
+<span class="text-on-surface-variant font-sans text-xs">All API fetches and extractors completed without crashing.</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container/70 border border-outline-variant/40 flex items-center justify-between">
+<span class="text-amber-400 font-bold">PARTIAL</span>
+<span class="text-on-surface-variant font-sans text-xs">One non-critical data connector encountered network throttle.</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container/70 border border-outline-variant/40 flex items-center justify-between">
+<span class="text-red-400 font-bold">BLOCKED</span>
+<span class="text-on-surface-variant font-sans text-xs">Preflight check failed or read-only boundary tripped.</span>
+</div>
+</div>
+</div>
+<!-- Tier 2: Evidence Outcome State -->
+<div class="p-6 rounded-2xl bg-surface-container border border-primary/40 shadow-xl">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">gavel</span>
+<h3 class="text-base font-bold text-white">Tier 2: Evidence Outcome State</h3>
+</div>
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/30">BUSINESS EVIDENCE LAYER</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-6 leading-relaxed">Evaluates whether factual claims are verified by cited source records without contradictions.</p>
+<div class="space-y-3 font-mono text-xs">
+<div class="p-3 rounded-lg bg-surface-container-high border border-primary/30 flex items-center justify-between">
+<span class="text-primary font-bold">SATISFIED</span>
+<span class="text-on-surface-variant font-sans text-xs">Every claim backed by admissible source hashes. Valid fee charged.</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container-high border border-amber-500/30 flex items-center justify-between">
+<span class="text-amber-400 font-bold">CONDITIONAL</span>
+<span class="text-on-surface-variant font-sans text-xs">Conflict flagged (e.g. CRM vs Email ARR). <strong>Planned fee: $0.00</strong></span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container-high border border-red-500/30 flex items-center justify-between">
+<span class="text-red-400 font-bold">UNVERIFIED</span>
+<span class="text-on-surface-variant font-sans text-xs">Evidence is missing or a source reference is broken.<strong>Planned fee: $0.00</strong></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Realistic Scenario Clarification -->
+<div class="p-6 rounded-2xl bg-gradient-to-r from-surface-container-low to-surface-container border border-outline-variant/80">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary text-[28px] shrink-0 mt-1">lightbulb</span>
+<div>
+<h4 class="text-base font-bold text-white">The Real-World Test: CRM vs. Email Negotiation Conflict</h4>
+<p class="text-sm text-on-surface-variant mt-1.5 leading-relaxed">
+                When an executive asks for a meeting dossier, CRM Salesforce shows <span class="text-white font-mono">$1,200,000 ARR</span> while an internal meeting note from yesterday states: <span class="text-white font-mono">"Buyer revised budget ceiling down to $850,000"</span>. Traditional AI blends these or picks one arbitrarily, billing you for a hallucinated brief. Dotonomy records Tier 1 <span class="text-emerald-400 font-mono">COMPLETED</span> (APIs responded normally), but Tier 2 triggers <span class="text-amber-400 font-mono">CONDITIONAL (CONFLICT_DETECTED)</span>. The brief explicitly highlights both figures side-by-side, halts false consensus, and your outcome bill is strictly <span class="text-primary font-mono font-bold">$0.00</span>.
+              </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- PRODUCT DEMO: CLIENT MEETING READINESS PACK v0.1 -->
+<section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="meeting-wedge">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="p-8 lg:p-12 rounded-3xl bg-surface-container-lowest border border-outline-variant/80 shadow-2xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+<div class="lg:col-span-5">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ BUILT FOR SALES LEADERS &amp; CS TEAMS ]</div>
+<h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-2">
+                Client Meeting Readiness Pack v0.1
+              </h2>
+<p class="text-sm text-on-surface-variant mt-4 leading-relaxed">
+                Enterprise sales reps and Account Executives spend hours cross-referencing Salesforce records, email threads, and calendar attendee histories before QBRs. Dotonomy produces verified, read-only dossiers with traceable citations.
+              </p>
+<div class="mt-6 space-y-3 font-mono text-xs">
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span>100% Read-Only: Zero write APIs connected</span>
+</div>
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span>Calendar + CRM + Email + Documents (sample data in this build)</span>
+</div>
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span>Sentence-Level Provenance Source IDs</span>
+</div>
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span>Automated Conflict Flagging (e.g. Budget Mismatches)</span>
+</div>
+</div>
+<div class="mt-8 flex items-center gap-3">
+<a class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-xs hover:bg-emerald-400 transition-all" href="#simulator">
+<span>Run Interactive Simulator</span>
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+</a>
+<a class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline-variant text-slate-300 text-xs font-semibold hover:bg-surface-container transition-all" href="#trial">
+<span>Start Free Trial</span>
+</a>
+</div>
+</div>
+<!-- Realistic Meeting Dossier Preview -->
+<div class="lg:col-span-7">
+<div class="rounded-xl bg-[#0b0f17] border border-outline-variant/80 p-5 shadow-xl">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60 font-mono text-xs mb-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+<span class="text-white font-semibold">Example output: Horizon Global renewal</span>
+</div>
+<span class="text-[10px] px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-700/50">CONDITIONAL (CONFLICT)</span>
+</div>
+<div class="space-y-3.5 text-xs leading-relaxed">
+<p class="text-slate-200">
+                    Lead executive sponsor scheduled annual contract review for Thursday 14:00 EST 
+                    <span class="text-secondary font-mono bg-surface-container-high px-1.5 py-0.5 rounded border border-outline-variant/40">[Cal-Event #412]</span>.
+                  </p>
+<!-- Adversarial Conflict Highlight -->
+<div class="p-3.5 rounded-lg bg-amber-950/20 border border-amber-500/40 space-y-1.5">
+<div class="flex items-center gap-2 text-amber-400 font-mono font-semibold text-[11px]">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+<span>FACTUAL CONFLICT DETECTED — CONSENSUS HALTED</span>
+</div>
+<p class="text-slate-300 text-[11px]">
+                      Salesforce CRM lists target renewal ARR as <strong class="text-white">$1,200,000</strong> <span class="text-secondary font-mono bg-surface-container px-1 py-0.2 rounded">[SFDC-Opp #771]</span>. 
+                      However, executive email thread #412 from Oct 19 cites <strong class="text-amber-300">$850,000 ceiling</strong> due to procurement budget freeze <span class="text-secondary font-mono bg-surface-container px-1 py-0.2 rounded">[Mail-Thread #412]</span>.
+                    </p>
+<p class="text-slate-400 text-[10px] font-mono">
+                      Rule Applied: Contradiction halted synthetic projection. Outcome set to CONDITIONAL.
+                    </p>
+</div>
+<p class="text-slate-200">
+                    Security review sign-off completed by CISO office on Oct 14 
+                    <span class="text-secondary font-mono bg-surface-container-high px-1.5 py-0.5 rounded border border-outline-variant/40">[Doc-Ref #998]</span>.
+                  </p>
+<div class="p-3 rounded-lg bg-[#070a10] border border-outline-variant/50 font-mono text-[11px] flex flex-wrap items-center justify-between gap-2">
+<span class="text-on-surface-variant">EXAMPLE ONLY. Run the live demo for a real signed receipt.</span>
+<span class="text-primary truncate font-bold"> </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ESSENTIAL NEW SECTION: WHAT AN OUTCOME RECEIPT PROVES — AND WHAT IT DOESN'T -->
+<section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="proves-section">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-12">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ TRANSPARENT GOVERNANCE BOUNDS ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            What an Outcome Receipt Proves — And What It Doesn't
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">Signed receipts show what the system recorded, which checks passed, and that the record has not been altered. They do not replace human judgment.</p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- What It Proves -->
+<div class="p-7 rounded-2xl bg-surface-container-low border border-primary/40 shadow-lg">
+<div class="flex items-center gap-3 mb-5">
+<span class="material-symbols-outlined text-primary text-[26px]">check_circle</span>
+<h3 class="text-lg font-bold text-white">What the Receipt Proves</h3>
+</div>
+<ul class="space-y-4 text-xs leading-relaxed text-slate-300">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<strong class="text-white block font-medium">Input Contract &amp; Version Hash:</strong>
+                  The exact JSON schema, dot capability versions, and execution plan hash applied to this task.
+                </div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<strong class="text-white block font-medium">7 Preflight Policy Gates:</strong>A signed record of which preflight checks ran and whether they passed.</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<strong class="text-white block font-medium">Sentence-Level Citation Mapping:</strong>Every factual claim links to a source record ID.</div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<strong class="text-white block font-medium">Ed25519 Asymmetric Signature Integrity:</strong>
+                  Proof that the receipt was signed with Dotonomy’s private key and has not been modified by a single byte since issue.
+                </div>
+</li>
+</ul>
+</div>
+<!-- What It Does NOT Prove -->
+<div class="p-7 rounded-2xl bg-surface-container-low border border-outline-variant/60">
+<div class="flex items-center gap-3 mb-5">
+<span class="material-symbols-outlined text-amber-400 text-[26px]">info</span>
+<h3 class="text-lg font-bold text-white">What the Receipt Does NOT Prove</h3>
+</div>
+<ul class="space-y-4 text-xs leading-relaxed text-slate-300">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-400 text-[18px] shrink-0 mt-0.5">block</span>
+<div>
+<strong class="text-white block font-medium">External Ground Truth ("Garbage In, Garbage Verified"):</strong>
+                  If a user entered an incorrect number into Salesforce last month, the receipt verifies that the brief faithfully cited the CRM record, not that the record reflects physical reality.
+                </div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-400 text-[18px] shrink-0 mt-0.5">block</span>
+<div>
+<strong class="text-white block font-medium">Future Commercial Deal Outcomes:</strong>
+                  A verified meeting readiness brief prepares executives with exact records; it cannot guarantee deal closure or substitute for sales acumen.
+                </div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-400 text-[18px] shrink-0 mt-0.5">block</span>
+<div>
+<strong class="text-white block font-medium">Substitute for Formal Legal Counsel:</strong>
+                  Receipts confirm data provenance and policy adherence under contract specifications; they do not constitute legal advice or statutory indemnity.
+                </div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<!-- LIVE TELEMETRY SIMULATOR -->
+<section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="simulator">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-10">
+<div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ LIVE RUNTIME ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">Run It Live</h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            Run sample enterprise payloads through Dotonomy's kernel. Observe how contradicting evidence triggers an immediate operational halt with <strong class="text-white">$0.00 fee liability</strong>.
+          </p>
+</div>
+<div class="rounded-2xl bg-[#080c13] border border-outline-variant/80 shadow-2xl overflow-hidden font-mono text-xs"><div class="px-6 py-4 bg-surface-container border-b border-outline-variant/60 flex flex-wrap items-center gap-3"><span class="text-on-surface-variant">SCENARIO:</span>
+<button class="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-bold text-xs shadow-sm transition-all" data-scen="normal" type="button">Clean (Northstar)</button><button class="px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface hover:text-white border border-outline-variant/60 text-xs transition-all" data-scen="conflict" type="button">CRM vs email conflict (Horizon)</button><button class="px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface hover:text-white border border-outline-variant/60 text-xs transition-all" data-scen="stale" type="button">Stale CRM (Globex)</button><button class="px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface hover:text-white border border-outline-variant/60 text-xs transition-all" data-scen="ambig" type="button">Ambiguous meeting (Acme)</button></div>
+<div class="px-6 py-3 border-b border-outline-variant/60 flex flex-wrap items-center gap-6 text-on-surface-variant"><span class="text-tertiary">BREAK IT:</span><label class="flex items-center gap-2"><input id="optNoMail" type="checkbox"/> Revoke email access</label><label class="flex items-center gap-2"><input id="optExt" type="checkbox"/> Send confidential data to an external model</label><button class="ml-auto px-4 py-2 rounded-lg bg-primary text-on-primary font-bold" id="liveRun" type="button">Run</button></div>
+<div aria-live="polite" class="p-6 min-h-[200px] space-y-1 text-on-surface-variant" id="liveOut">Choose a scenario and press Run. Demo runs use sample data, are signed, and are marked as samples.</div></div>
+</div>
+</section>
+<!-- WORKING IN-PAGE INTERACTIVE PUBLIC RECEIPT VERIFIER -->
+<section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="receipt-verifier">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-12">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ PUBLIC RECEIPT CHECK ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            Public Receipt Verifier
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">Demo receipts are signed with our Ed25519 key and marked as samples. Load the last one, check it, then alter one field and check it again.</p>
+</div>
+<div class="rounded-2xl bg-[#090d15] border border-outline-variant/80 shadow-2xl p-6 font-mono">
+<div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-outline-variant/60 text-xs">
+<div class="flex items-center gap-2">
+<span class="text-slate-300 font-bold">INSPECT RECEIPT JSON</span>
+<span class="text-[10px] px-2 py-0.5 rounded bg-surface-container text-secondary border border-secondary/30">ED25519 TEST SUITE</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1 rounded bg-surface-container hover:bg-surface-bright text-xs text-slate-200 border border-outline-variant/60 transition-all" id="btnLoadValidReceipt">Load Last Receipt</button>
+<button class="px-3 py-1 rounded bg-surface-container hover:bg-surface-bright text-xs text-amber-300 border border-amber-600/50 transition-all" id="btnLoadTamperedReceipt">Alter One Field</button>
+</div>
+</div>
+<!-- Payload Textarea -->
+<div class="mt-4">
+<label class="sr-only" for="receiptInputArea">Receipt JSON Payload</label>
+<textarea class="w-full h-56 p-4 rounded-xl bg-[#06080e] border border-outline-variant/60 text-xs text-slate-200 font-mono leading-relaxed focus:border-primary focus:outline-none" id="receiptInputArea" spellcheck="false"></textarea>
+</div>
+<!-- Verification Action Bar -->
+<div class="mt-4 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-outline-variant/50">
+<div class="flex items-center gap-3">
+<button class="px-5 py-2.5 rounded-xl bg-primary hover:bg-emerald-400 text-on-primary font-bold text-xs flex items-center gap-2 transition-all shadow-md" id="btnVerifySignature">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Verify Cryptographic Signature</span>
+</button>
+<span class="text-xs text-on-surface-variant font-sans">Public Key: <span class="font-mono text-slate-300"><span id="pubKeyId">loading…</span> · <a class="text-primary underline" href="/api/public-key">public key</a></span></span>
+</div>
+<!-- Verification Status Badge -->
+<div class="px-3.5 py-1.5 rounded-lg bg-surface-container border border-outline-variant text-xs flex items-center gap-2 font-mono" id="verifierResultBadge">
+<span class="w-2 h-2 rounded-full bg-slate-500" id="badgeDot"></span>
+<span class="text-slate-300" id="badgeText">READY FOR VERIFICATION</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- HONEST COMMERCIAL MODEL & "WHO CHECKS THE CHECKER?" -->
+<section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="status"><div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ STATUS, PLAINLY ]</div><h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">What is live today, and what is not</h2>
+<div class="grid md:grid-cols-3 gap-4 mt-8"><div class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><div class="font-mono text-xs text-primary mb-2">LIVE NOW</div><ul class="text-sm text-on-surface-variant space-y-1 list-disc pl-4"><li>Seven preflight checks that reject a bad plan before anything runs</li><li>Output validation: a Dot that returns the wrong shape is stopped</li><li>Source-conflict, stale-data and ambiguity handling</li><li>Ed25519-signed, hash-chained receipts with public verification</li><li>Accounts, a capped free trial, Postgres storage</li><li>Automated tests, including prompt-injection and malicious-Dot cases</li></ul></div>
+<div class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><div class="font-mono text-xs text-tertiary mb-2">IN DEVELOPMENT</div><ul class="text-sm text-on-surface-variant space-y-1 list-disc pl-4"><li>Live calendar connector (read-only), then CRM, email, documents</li><li>Context expiry timers and per-step time limits</li><li>Billing and a formal dispute process</li><li>Benchmark against a real AI agent</li></ul></div>
+<div class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><div class="font-mono text-xs text-slate-400 mb-2">NOT CLAIMED</div><ul class="text-sm text-on-surface-variant space-y-1 list-disc pl-4"><li>No security certifications yet</li><li>No patent, and no claim that this is a first</li><li>No guarantee that source records are true</li><li>Data-protection review still pending</li></ul></div></div>
+<div class="rounded-xl bg-surface-container border border-outline-variant/60 p-6 mt-4"><div class="font-mono text-xs text-secondary mb-2">BENCHMARK STATUS</div><p class="text-sm text-on-surface-variant">We compare the runtime with a plain tool-calling agent on the same eight cases. The first run used simulated baselines, so it only proves the test harness works. A run against a real AI agent is pending, and we will publish the numbers, good or bad, once it is done.</p></div></div></section><section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="billing">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center max-w-3xl mx-auto mb-14">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ COMMERCIAL MODEL · BILLING NOT LIVE YET ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            Settle-on-Satisfaction Commercial Model
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            Eliminate speculative cloud billing. You only pay for dossiers where acceptance criteria are proven. Blocked, conditional, or unverified runs are billed at <strong class="text-white">$0.00</strong>.
+          </p>
+</div>
+<!-- 3 Transparent Commercial Tiers -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- Tier 1: Free Evaluation -->
+<div class="p-8 rounded-2xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-mono text-secondary font-semibold">FREE TRIAL</span>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">READ-ONLY</span>
+</div>
+<h3 class="text-xl font-bold text-white">Free Trial</h3>
+<div class="mt-4 flex items-baseline gap-1">
+<span class="text-4xl font-bold text-white font-mono">$0</span>
+<span class="text-xs text-on-surface-variant font-mono">/ capped runs</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-4 leading-relaxed">Run the meeting brief on built-in sample data. Capped number of runs.</p>
+<ul class="mt-6 space-y-3 text-xs text-slate-300">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Capped free runs</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Meeting Readiness Pack v0.1</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Full 7-Gate Preflight Validator</span>
+</li>
+</ul>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/40">
+<a class="w-full inline-flex justify-center py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-bright text-white text-xs font-semibold transition-all" href="#trial">Start Free Trial</a>
+</div>
+</div>
+<!-- Tier 2: Outcome Pilot -->
+<div class="p-8 rounded-2xl bg-surface-container border-2 border-primary shadow-2xl relative flex flex-col justify-between">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-on-primary font-mono text-[10px] uppercase font-bold tracking-wider">
+              RECOMMENDED PILOT
+            </div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-mono text-primary font-semibold">SETTLE-ON-SATISFACTION</span>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/20 text-primary">TIER 2 GUARD</span>
+</div>
+<h3 class="text-xl font-bold text-white">Outcome Pilot</h3>
+<div class="mt-4 flex items-baseline gap-1">
+<span class="text-3xl font-bold text-primary font-mono">Volume Pilot</span>
+<span class="text-xs text-on-surface-variant font-mono">/ satisfied run</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-4 leading-relaxed">Flexible rate based on data connector volume. Planned: $0 fee on blocked or conditional runs.</p>
+<ul class="mt-6 space-y-3 text-xs text-slate-300">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span><strong>$0 Fee Invariant</strong> on Blocked / Ambiguous runs</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Ed25519-signed cryptographic receipts</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Live connectors (in development)</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Dispute process (planned)</span>
+</li>
+</ul>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/40">
+<a class="w-full inline-flex justify-center py-2.5 rounded-xl bg-primary hover:bg-emerald-400 text-on-primary text-xs font-bold transition-all shadow-[0_0_16px_rgba(16,185,129,0.3)]" href="#trial">Join the Pilot Waitlist</a>
+</div>
+</div>
+<!-- Tier 3: Enterprise Dedicated Plane -->
+<div class="p-8 rounded-2xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-mono text-amber-400 font-semibold">ROADMAP</span>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">CUSTOM SLA</span>
+</div>
+<h3 class="text-xl font-bold text-white">Dedicated Plane</h3>
+<div class="mt-4 flex items-baseline gap-1">
+<span class="text-4xl font-bold text-white font-mono">Custom</span>
+<span class="text-xs text-on-surface-variant font-mono">/ annual deployment</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-4 leading-relaxed">Planned options for larger teams. Not available yet.</p>
+<ul class="mt-6 space-y-3 text-xs text-slate-300">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Customer-held verification keys (planned)</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Dedicated audit database (planned)</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Custom Dot authoring (planned)</span>
+</li>
+</ul>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/40">
+<a class="w-full inline-flex justify-center py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-bright text-white text-xs font-semibold transition-all" href="#trial">Talk to Us</a>
+</div>
+</div>
+</div>
+<!-- WHO CHECKS THE CHECKER DISCLOSURE -->
+<div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/80 flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary text-[26px] shrink-0 mt-0.5">policy</span>
+<div>
+<h4 class="text-sm font-bold text-white uppercase font-mono tracking-wider">Verifier Independence: "Who Checks the Checker?"</h4>
+<p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">Because we would bill on satisfaction, our own verdict cannot be the only check. You get every receipt as raw JSON and can verify it against our public key without our servers, using the small command-line verifier that ships with the code. A formal dispute and credit process will be defined before any paid billing starts.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- TRIAL SIGNUP FORM -->
+<section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="faq"><div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8"><h2 class="text-3xl font-bold text-white tracking-tight">Questions</h2><div class="mt-6 space-y-3"><details class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><summary class="cursor-pointer text-white font-semibold">Does it connect to my Salesforce or Google account?</summary><p class="mt-3 text-sm text-on-surface-variant">Not yet. Today it runs on built-in sample data so you can test the checks and the receipts. A read-only calendar connector is the next step.</p></details><details class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><summary class="cursor-pointer text-white font-semibold">What does a receipt prove?</summary><p class="mt-3 text-sm text-on-surface-variant">That the system recorded these steps and checks and that nothing was altered after signing. It does not prove the source records are true.</p></details><details class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><summary class="cursor-pointer text-white font-semibold">How is this different from a normal AI agent?</summary><p class="mt-3 text-sm text-on-surface-variant">A plain agent decides for itself that it is done. Here the plan is checked first, and a separate verifier decides the outcome. Whether that beats a strong agent in practice is what our benchmark is meant to show.</p></details><details class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><summary class="cursor-pointer text-white font-semibold">Is it patented?</summary><p class="mt-3 text-sm text-on-surface-variant">No. We describe it as a proposed architecture and make no patent or novelty claim.</p></details><details class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><summary class="cursor-pointer text-white font-semibold">Will I be charged?</summary><p class="mt-3 text-sm text-on-surface-variant">Not today. Billing is not live. The plan is to charge only for runs that meet the agreed acceptance criteria, and we will publish the terms first.</p></details></div></div></section><section class="w-full bg-surface-container-lowest py-20" id="trial">
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<div class="w-12 h-12 rounded-2xl bg-surface-container border border-outline-variant/80 p-1.5 mx-auto mb-6 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+<svg aria-label="Dotonomy" class="w-full h-full" role="img" viewbox="0 0 24 24"><circle cx="12" cy="12" fill="none" r="9" stroke="#4edea3" stroke-width="2"></circle><circle cx="12" cy="12" fill="#4edea3" r="3.5"></circle></svg>
+</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Start Your Free Trial</h2>
+<p class="mt-3 text-sm sm:text-base text-on-surface-variant leading-relaxed">Create an account to keep your runs, receipts and history. The trial runs on built-in sample data today; live calendar and CRM connectors are next.</p>
+<!-- Structured Signup Form -->
+<form class="mt-8 text-left space-y-4 p-6 rounded-2xl bg-surface-container border border-outline-variant/70 shadow-xl" id="pilotForm">
+<div>
+<label class="block text-xs font-mono text-slate-300 mb-1.5" for="workEmail">Work Email Address</label>
+<input autocomplete="username" class="w-full px-4 py-2.5 rounded-lg bg-[#06080e] border border-outline-variant/70 text-white placeholder:text-outline text-xs focus:outline-none focus:border-primary font-mono transition-all" id="workEmail" placeholder="rep@enterprise.corp" required="" type="email"/>
+</div><div>
+<label class="block text-xs font-mono text-slate-300 mb-1.5" for="workEmail">Password</label>
+<input autocomplete="new-password" class="w-full px-4 py-2.5 rounded-lg bg-[#06080e] border border-outline-variant/70 text-white placeholder:text-outline text-xs focus:outline-none focus:border-primary font-mono transition-all" id="signupPw" minlength="10" placeholder="Password, 10+ characters" required="" type="password"/>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+
+</div>
+<button class="w-full mt-2 py-3 rounded-xl bg-primary hover:bg-emerald-400 text-on-primary font-bold text-xs uppercase font-mono tracking-wider transition-all shadow-md" type="submit">Create Free Account</button>
+</form>
+<div class="hidden mt-4 p-3 rounded-lg bg-primary/10 border border-primary/30 text-primary text-xs font-mono" id="trialConfirmation">
+          ✓ Read-only workspace created. Ed25519 sandbox keys and setup instructions dispatched to your email.
+        </div>
+<div class="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-on-surface-variant">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[16px]">check</span> Zero write scopes</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[16px]">check</span>Capped free runs</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[16px]">check</span>Data-protection review pending</span>
+</div>
+</div>
+</section>
+</main>
+<!-- ACCESSIBLE FOOTER -->
+<footer class="w-full bg-[#06090e] border-t border-outline-variant/40 py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container border border-outline-variant/60 p-1 flex items-center justify-center">
+<svg aria-label="Dotonomy" class="w-full h-full" role="img" viewbox="0 0 24 24"><circle cx="12" cy="12" fill="none" r="9" stroke="#4edea3" stroke-width="2"></circle><circle cx="12" cy="12" fill="#4edea3" r="3.5"></circle></svg>
+</div>
+<div>
+<span class="font-bold text-sm text-white">Dotonomy</span>
+<span class="text-xs text-on-surface-variant font-mono ml-2">— Open Engineering Build v0.5</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-5 text-xs text-on-surface-variant font-mono">
+<a class="hover:text-white transition-colors" href="#contracts">Manifest Spec</a>
+<a class="hover:text-white transition-colors" href="#preflight-lifecycle">7 Gates</a>
+<a class="hover:text-white transition-colors" href="#receipt-verifier">Verifier CLI</a>
+<a class="hover:text-white transition-colors" href="#proves-section">Receipt Scope</a>
+<a class="hover:text-white transition-colors" href="/privacy.html">Privacy</a>
+<span class="text-outline-variant">|</span>
+<span>Early build v0.3</span>
+</div>
+</div>
+</footer>
+<!-- SCRIPT LOGIC FOR SIMULATOR & INTERACTIVE RECEIPT VERIFIER -->
+
+<script src="/site.js"></script></body></html>

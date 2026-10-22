@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_standard" name="shell-type"/>
+<title>Dotonomy — Your Meeting Brief, With Proof of Where Every Fact Came From</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body { margin: 0; padding: 0; background-color: #090d14; color: #dfe2ee; }
+      body { overscroll-behavior: none; }
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f131c; }
+    ::-webkit-scrollbar-thumb { background: #262a33; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3c4a42; }
+    .bg-grid-pattern {
+      background-size: 36px 36px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    .code-scroll::-webkit-scrollbar { height: 4px; }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-variant": "#222733",
+            "on-primary-fixed": "#002113",
+            "surface-dim": "#0a0d14",
+            "on-tertiary": "#472a00",
+            "secondary": "#38bdf8",
+            "secondary-container": "#0369a1",
+            "surface-bright": "#2d3340",
+            "surface-tint": "#10b981",
+            "tertiary": "#f59e0b",
+            "surface-container-highest": "#282e3b",
+            "background": "#080c13",
+            "on-background": "#f1f5f9",
+            "outline": "#64748b",
+            "on-surface": "#f1f5f9",
+            "surface-container-lowest": "#05070b",
+            "primary-fixed": "#6ee7b7",
+            "surface": "#0c1018",
+            "primary-container": "#047857",
+            "on-primary-container": "#ecfdf5",
+            "surface-container-high": "#1e232e",
+            "surface-container-low": "#111520",
+            "surface-container": "#151a24",
+            "outline-variant": "#2a3342",
+            "primary": "#10b981",
+            "on-primary": "#002c1c",
+            "on-surface-variant": "#94a3b8",
+            "error": "#f87171",
+            "error-container": "#7f1d1d"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-background font-sans text-on-surface antialiased selection:bg-primary/25 selection:text-primary">
+<!-- TOP NAVIGATION HEADER -->
+<header class="fixed top-0 left-0 w-full z-50 bg-[#090d14]/90 backdrop-blur-xl border-b border-outline-variant/60 shadow-[0_4px_24px_rgba(0,0,0,0.6)]">
+<div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+<!-- Brand Logo + Identity -->
+<div class="flex items-center gap-6">
+<a aria-label="Dotonomy Home" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-primary rounded-lg" href="#">
+<div class="w-10 h-10 rounded-xl bg-[#0e1420] border border-outline-variant/80 p-1 flex items-center justify-center shadow-[0_0_16px_rgba(16,185,129,0.12)] group-hover:border-primary/60 transition-all">
+<img alt="Dotonomy Brand Mark" class="w-full h-full object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFWJxojtv2rxOJ5AGjH5R_copSUHIlPRisaU27TF3sJZ0VwY8Bt5DQJyqr00pGKhYliuRN7gWo5A_dVell4vZRite0l7T4VcM0wa9ecPVlKh979O8tMT-lvkIsbxbDB5WYQ2gRcLSFRcMovvgP_fpkbsH8SCqKxLcIS_d4aoyhrlVj9TjD_2bEsZlxj3OOrAT916g3B6m_i6ZK9enz43mbZcE3uV92JaWL_tmdL3xG-9qRDl-aJT2nJyrvRpu7Hr_awg"/>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-bold text-lg tracking-tight text-white group-hover:text-primary transition-colors">Dotonomy</span>
+<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/25 font-semibold">BUILD v0.5</span>
+</div>
+<span class="text-[10px] font-mono tracking-wider text-on-surface-variant uppercase">Verified Outcome Layer</span>
+</div>
+</a>
+<!-- Desktop Primary Nav -->
+<nav aria-label="Main Navigation" class="hidden lg:flex items-center gap-1 ml-4 text-[13px] font-medium text-on-surface-variant">
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#contracts">Outcome Contracts</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#preflight-lifecycle">7-Gate Lifecycle</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#state-machine">Decoupled State</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#meeting-wedge">Client Brief Wedge</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#proves-section">Receipt Scope</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#receipt-verifier">Receipt Verifier</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#billing">Commercial Model</a>
+</nav>
+</div>
+<!-- Right CTAs -->
+<div class="flex items-center gap-3">
+<div class="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#0d121c] border border-outline-variant/60 font-mono text-[11px] text-on-surface-variant">
+<span aria-hidden="true" class="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#10b981]"></span>
+<span>RUNTIME: ED25519 VERIFIED</span>
+</div>
+<a class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant text-[13px] font-medium text-white hover:bg-surface-container-high transition-colors" href="#receipt-verifier">
+<span class="material-symbols-outlined text-[16px] text-secondary">verified</span>
+<span>Verify a Receipt</span>
+</a>
+<a class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-primary text-on-primary font-semibold text-[13px] hover:bg-primary-fixed shadow-[0_0_16px_rgba(16,185,129,0.3)] transition-all" href="#trial">
+<span>Try Meeting Brief</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</header>
+<main class="w-full pt-16 bg-background">
+<!-- HERO SECTION: CLEAR, HONEST BUYER POSITIONING -->
+<section class="relative w-full overflow-hidden border-b border-outline-variant/40 bg-surface-container-lowest pt-20 pb-24 lg:pt-28 lg:pb-32 bg-grid-pattern">
+<div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[360px] bg-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
+<div class="absolute top-1/3 right-10 w-[400px] h-[300px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
+<!-- Baseline Tagline -->
+<div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-surface-container-low border border-outline-variant/80 shadow-inner mb-6">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-mono text-xs uppercase tracking-wider text-slate-300">Deterministic Audit Ledgers • Sentence-Level Citations • Read-Only Enforced</span>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-highest text-secondary border border-secondary/30">OPEN v0.5 SPEC</span>
+</div>
+<!-- Corrected Hero Headline (Buyer-Focused) -->
+<h1 class="text-4xl sm:text-6xl lg:text-[62px] font-bold text-white tracking-tight leading-[1.15] max-w-5xl">
+          Your Meeting Brief, With Proof of Where Every Fact Came From.
+        </h1>
+<!-- Corrected Subheadline (Clear, Honest) -->
+<p class="mt-6 max-w-3xl text-lg sm:text-xl text-on-surface-variant font-normal leading-relaxed">
+          Dotonomy runs deterministic verification across your calendar, CRM, and documents before outputting client briefs. 
+          <span class="text-white font-medium">Settle-on-Satisfaction:</span> you only pay when the contractually declared acceptance criteria are independently satisfied.
+        </p>
+<!-- Corrected CTAs -->
+<div class="mt-10 flex flex-wrap items-center justify-center gap-4">
+<a class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-on-primary font-semibold text-sm hover:bg-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.35)] transition-all" href="#trial">
+<span class="material-symbols-outlined text-[20px]">calendar_today</span>
+<span>Try Client Meeting Brief</span>
+</a>
+<a class="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-surface-container-high border border-outline-variant text-white font-medium text-sm hover:bg-surface-bright transition-all" href="#receipt-verifier">
+<span class="material-symbols-outlined text-[20px] text-secondary">verified</span>
+<span>Verify an Outcome Receipt</span>
+</a>
+<a class="inline-flex items-center gap-2 px-4 py-3.5 text-on-surface-variant hover:text-white text-sm font-medium transition-colors" href="#state-machine">
+<span>Inspect Two-Tier State Machine</span>
+<span class="material-symbols-outlined text-[18px]">east</span>
+</a>
+</div>
+<!-- Honest Build Metrics (Replaced Hyper-Inflated Badges) -->
+<div class="mt-16 w-full max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-3 p-3 rounded-2xl bg-surface-container-low/90 border border-outline-variant/70 backdrop-blur-md">
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
+<span class="font-mono text-2xl font-bold text-primary">7 Gates</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Preflight Policy Checks</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
+<span class="font-mono text-2xl font-bold text-secondary">Two-Tier</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Decoupled State Machine</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
+<span class="font-mono text-2xl font-bold text-amber-400">Ed25519</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Public-Key Signatures</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
+<span class="font-mono text-2xl font-bold text-white">$0.00</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">If Blocked / Conditional</span>
+</div>
+</div>
+</div>
+</section>
+<!-- BUILT ARCHITECTURE & SECURITY BASELINE (TRUTHFUL & MEASURED) -->
+<section class="w-full bg-surface-container-lowest py-10 border-b border-outline-variant/40">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[22px] shrink-0">key</span>
+<div>
+<h4 class="text-xs font-bold text-white font-mono uppercase">Ed25519 Asymmetric Verification</h4>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Public keys published in DNS TXT and HTTPS endpoints for instant offline verification.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[22px] shrink-0">lock</span>
+<div>
+<h4 class="text-xs font-bold text-white font-mono uppercase">Zero Ambient Credentials</h4>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Per-task scoped OAuth tokens. No persistent root API keys shared across tenant executions.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-400 text-[22px] shrink-0">timer</span>
+<div>
+<h4 class="text-xs font-bold text-white font-mono uppercase">Purpose-Bound Context</h4>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Envelopes expire automatically after 60m TTL, preventing long-lived prompt exfiltration.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
+<span class="material-symbols-outlined text-emerald-400 text-[22px] shrink-0">gavel</span>
+<div>
+<h4 class="text-xs font-bold text-white font-mono uppercase">NDPA &amp; GDPR Data Minimization</h4>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Built with scrypt auth, append-only SQLite/Postgres logs, and regional data residency readiness.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ARCHITECTURAL PARADIGM CONTRAST -->
+<section class="w-full bg-surface-container-low/50 py-20 border-b border-outline-variant/50" id="architecture">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-12">
+<div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ SYSTEMS AUDIT &amp; PARADIGM SHIFT ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            Why Probabilistic Automation Collapses in Client-Facing Work
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            Standard enterprise copilots query LLMs with broad credentials and hope for coherence. Dotonomy treats autonomous briefings as typed contracts guarded by strict compiler preflights.
+          </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Paradigm A: Probabilistic Copilots -->
+<div class="rounded-2xl bg-surface-container-low border border-red-900/40 p-8 flex flex-col justify-between relative overflow-hidden shadow-lg">
+<div class="absolute top-0 right-0 px-3 py-1 bg-red-950/80 border-b border-l border-red-700/50 text-red-300 font-mono text-[10px] uppercase font-semibold tracking-wider">
+              INDUSTRY FAILURE MODE
+            </div>
+<div>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-xl bg-red-950/40 border border-red-700/40 flex items-center justify-center text-red-400">
+<span class="material-symbols-outlined text-[22px]">error</span>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white">Probabilistic Copilots &amp; Agents</h3>
+<span class="text-xs font-mono text-red-300/80">Unverified Prompt Chaining &amp; Shared Tokens</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex items-start gap-3">
+<span class="material-symbols-outlined text-red-400 text-[18px] shrink-0 mt-0.5">vpn_key_alert</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Ambient Master OAuth Privileges</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Agents run with permanent workspace tokens. A single prompt injection or loose tool parameter can inadvertently leak customer CRM history or write unintended meeting notes.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex items-start gap-3">
+<span class="material-symbols-outlined text-red-400 text-[18px] shrink-0 mt-0.5">query_stats</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Conflated Status &amp; Smooth Hallucinations</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">If the Python runtime exits with code 0, traditional tools declare success—even when the underlying CRM and email threads give conflicting renewal numbers.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex items-start gap-3">
+<span class="material-symbols-outlined text-red-400 text-[18px] shrink-0 mt-0.5">money_off</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Speculative Per-Token Invoicing</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">You pay for every reasoning loop, retried tool call, and hallucinated summary, absorbing 100% of the financial penalty when outputs cannot be cited in front of a client.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-4 border-t border-outline-variant/40 flex items-center justify-between text-xs font-mono">
+<span class="text-on-surface-variant">VERIFICATION AUDIT:</span>
+<span class="text-red-400 font-semibold">ZERO PROVENANCE TRAIL</span>
+</div>
+</div>
+<!-- Paradigm B: Dotonomy Outcome Contract Layer -->
+<div class="rounded-2xl bg-surface-container border border-primary/40 p-8 flex flex-col justify-between relative overflow-hidden shadow-2xl">
+<div class="absolute top-0 right-0 px-3 py-1 bg-emerald-950/80 border-b border-l border-primary/50 text-emerald-300 font-mono text-[10px] uppercase font-bold tracking-wider">
+              DOTONOMY PROTOCOL
+            </div>
+<div>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-xl bg-primary/10 border border-primary/40 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">verified_user</span>
+</div>
+<div>
+<h3 class="text-xl font-bold text-white">Deterministic Outcome Contracts</h3>
+<span class="text-xs font-mono text-primary">Two-Tier Decoupled State &amp; Ed25519 Receipts</span>
+</div>
+</div>
+<div class="space-y-4">
+<div class="p-4 rounded-xl bg-surface-container-high/80 border border-primary/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">lock_clock</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Strict Read-Only Context Packs</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">No write scopes connected to external systems. Connectors run within 60-minute time-to-live boundaries with purpose-bound query parameters.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-high/80 border border-primary/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary text-[18px] shrink-0 mt-0.5">call_split</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Decoupled Operational vs. Outcome State</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">A clean tool run only proves Tier 1 (COMPLETED). If facts contradict or freshness policies fail, Tier 2 flags CONDITIONAL or BLOCKED, stopping false briefings.</p>
+</div>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-high/80 border border-primary/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-emerald-400 text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<h4 class="text-sm font-semibold text-white">Settle-on-Satisfaction Billing</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Cryptographic Ed25519 receipts bind execution costs to proof. If acceptance criteria are flagged BLOCKED, CONDITIONAL, or UNVERIFIED, outcome billing is strictly $0.00.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-4 border-t border-primary/30 flex items-center justify-between text-xs font-mono">
+<span class="text-on-surface-variant">CRYPTOGRAPHIC PROOF:</span>
+<span class="text-primary font-semibold">ED25519 ASYMMETRIC SIGNATURE</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- CORE PRIMITIVE: WHAT IS AN OUTCOME CONTRACT? -->
+<section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="contracts">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center max-w-3xl mx-auto mb-14">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ FORMAL SPECIFICATION ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">What is an Outcome Contract?</h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            An Outcome Contract is a declarative JSON/TypeScript specification that sets strict acceptance conditions, provenance requirements, data freshness horizons, and effect boundaries before an action begins.
+          </p>
+</div>
+<!-- 4 Pillars of an Outcome Contract -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+<div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant/60">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-primary mb-3">
+<span class="material-symbols-outlined text-[20px]">schema</span>
+</div>
+<h3 class="text-sm font-bold text-white font-mono">1. Output Schema</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Rigid JSON Schema definitions. If an emitted brief deviates by a single field or key, preflight validation aborts.</p>
+</div>
+<div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant/60">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-secondary mb-3">
+<span class="material-symbols-outlined text-[20px]">fact_check</span>
+</div>
+<h3 class="text-sm font-bold text-white font-mono">2. Citation Rules</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Every claim must map directly to an immutable source reference ID (CRM account, calendar invite, or signed file hash).</p>
+</div>
+<div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant/60">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-amber-400 mb-3">
+<span class="material-symbols-outlined text-[20px]">history_toggle_off</span>
+</div>
+<h3 class="text-sm font-bold text-white font-mono">3. Freshness Horizon</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Explicit TTL limits (e.g., CRM records ≤ 180 min, email negotiation notes ≤ 24 hrs). Outdated data triggers CONDITIONAL or BLOCKED status.</p>
+</div>
+<div class="p-5 rounded-xl bg-surface-container-low border border-outline-variant/60">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high flex items-center justify-center text-emerald-400 mb-3">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+</div>
+<h3 class="text-sm font-bold text-white font-mono">4. Effect Bounds</h3>
+<p class="text-xs text-on-surface-variant mt-2 leading-relaxed">Strict zero-write enforcement. Manifest declarations guarantee that the connector cannot mutate external records during brief compilation.</p>
+</div>
+</div>
+<!-- Code Block Spec -->
+<div class="rounded-2xl bg-[#0a0e16] border border-outline-variant/70 shadow-2xl overflow-hidden font-mono">
+<div class="px-6 py-3.5 bg-surface-container-high/60 border-b border-outline-variant/60 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+<span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+<span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+<span class="ml-3 text-xs text-slate-300 font-semibold tracking-wide">meeting_readiness_contract.schema.json</span>
+</div>
+<span class="text-[11px] text-primary px-2 py-0.5 rounded bg-primary/10 border border-primary/30">VALIDATED SCHEMA v0.5</span>
+</div>
+<div class="p-6 text-xs text-slate-300 leading-relaxed overflow-x-auto code-scroll">
+<pre><span class="text-outline-variant">// Dotonomy Kernel v0.5 - Outcome Contract Manifest</span>
+{
+  <span class="text-purple-400">"contractId"</span>: <span class="text-emerald-300">"contract.client_brief.v01"</span>,
+  <span class="text-purple-400">"version"</span>: <span class="text-emerald-300">"0.5.2"</span>,
+  <span class="text-purple-400">"effectBounds"</span>: {
+    <span class="text-purple-400">"writePermission"</span>: <span class="text-red-400">false</span>,
+    <span class="text-purple-400">"maxContextTtlMinutes"</span>: <span class="text-yellow-400">60</span>,
+    <span class="text-purple-400">"allowedEgressHosts"</span>: [<span class="text-emerald-300">"api.salesforce.com"</span>, <span class="text-emerald-300">"www.googleapis.com"</span>]
+  },
+  <span class="text-purple-400">"admissibleSources"</span>: [
+    <span class="text-emerald-300">"corp.salesforce.crm_accounts"</span>,
+    <span class="text-emerald-300">"corp.google.calendar_events"</span>,
+    <span class="text-emerald-300">"corp.shared_drive.approved_proposals"</span>
+  ],
+  <span class="text-purple-400">"freshnessHorizon"</span>: {
+    <span class="text-purple-400">"crmSnapshotMaxAgeMinutes"</span>: <span class="text-yellow-400">180</span>,
+    <span class="text-purple-400">"calendarLookaheadHours"</span>: <span class="text-yellow-400">48</span>
+  },
+  <span class="text-purple-400">"settlementRules"</span>: {
+    <span class="text-purple-400">"feeOnSatisfied"</span>: <span class="text-emerald-300">"OUTCOME_PILOT_RATE"</span>,
+    <span class="text-purple-400">"feeOnBlockedOrConditional"</span>: <span class="text-emerald-300">"$0.00"</span>,
+    <span class="text-purple-400">"signatureAlgorithm"</span>: <span class="text-emerald-300">"Ed25519"</span>
+  }
+}</pre>
+</div>
+</div>
+</div>
+</section>
+<!-- THE 7-GATE PREFLIGHT & RUNTIME LIFECYCLE (ACCURATE & RIGID) -->
+<section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="preflight-lifecycle">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center max-w-3xl mx-auto mb-14">
+<div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ 7 STATIC PREFLIGHT GATES ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">The 7-Gate Preflight Verification Lifecycle</h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            Before executing any external query or generative step, Dotonomy evaluates seven sequential gates. If any policy check fails, the task aborts immediately before compute or fee spend.
+          </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3">
+<!-- Gate 1 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-primary/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-primary block mb-2">GATE 01</span>
+<h3 class="text-xs font-bold text-white">Manifest Schema</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Validates JSON Schema conformity and Dot version compatibility.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">VALIDATION</span>
+</div>
+<!-- Gate 2 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-secondary/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-secondary block mb-2">GATE 02</span>
+<h3 class="text-xs font-bold text-white">Scoped Permissions</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Verifies task-scoped OAuth tokens with zero ambient credential access.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">READ-ONLY CHECK</span>
+</div>
+<!-- Gate 3 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-primary/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-primary block mb-2">GATE 03</span>
+<h3 class="text-xs font-bold text-white">Sensitivity Labels</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Confirms workspace classifications and tenant data boundaries.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">NDPA/GDPR GUARD</span>
+</div>
+<!-- Gate 4 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-emerald-400/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-emerald-400 block mb-2">GATE 04</span>
+<h3 class="text-xs font-bold text-white">Effect Bounds</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Guarantees zero-mutation enforcement. External write endpoints are locked.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">ZERO WRITES</span>
+</div>
+<!-- Gate 5 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-amber-400/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-amber-400 block mb-2">GATE 05</span>
+<h3 class="text-xs font-bold text-white">Evidence Paths</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Checks connectivity to declared CRM, calendar, and document sources.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">AVAILABILITY</span>
+</div>
+<!-- Gate 6 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-amber-400/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-amber-400 block mb-2">GATE 06</span>
+<h3 class="text-xs font-bold text-white">Freshness Horizon</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Rejects records older than policy TTL limits before brief assembly.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">TTL ENFORCEMENT</span>
+</div>
+<!-- Gate 7 -->
+<div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-primary/50 transition-all">
+<div>
+<span class="font-mono text-[11px] font-bold text-primary block mb-2">GATE 07</span>
+<h3 class="text-xs font-bold text-white">Budget &amp; Timeout</h3>
+<p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Hard execution deadlines (15s) prevent runaway cost loops.</p>
+</div>
+<span class="mt-4 pt-2 border-t border-outline-variant/40 font-mono text-[9px] text-slate-400">COST CEILING</span>
+</div>
+</div>
+</div>
+</section>
+<!-- FUNDAMENTAL ARCHITECTURE: TWO-TIER STATE MACHINE DECOUPLING -->
+<section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="state-machine">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-12">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ THE CORE ENGINEERING INNOVATION ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            The Two-Tier State Machine Decoupling
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            The fatal flaw in modern automation is treating technical execution as factual truth. Dotonomy permanently decouples whether a process <span class="text-white font-medium">ran successfully</span> from whether its evidence <span class="text-white font-medium">satisfies acceptance standards</span>.
+          </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+<!-- Tier 1: Operational Run State -->
+<div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/70">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">dns</span>
+<h3 class="text-base font-bold text-white">Tier 1: Operational Run State</h3>
+</div>
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">INFRASTRUCTURE LAYER</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-6 leading-relaxed">Tracks the computational execution of data connectors, parsers, and prompt compilers.</p>
+<div class="space-y-3 font-mono text-xs">
+<div class="p-3 rounded-lg bg-surface-container/70 border border-outline-variant/40 flex items-center justify-between">
+<span class="text-emerald-400 font-bold">COMPLETED</span>
+<span class="text-on-surface-variant font-sans text-xs">All API fetches and extractors completed without crashing.</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container/70 border border-outline-variant/40 flex items-center justify-between">
+<span class="text-amber-400 font-bold">PARTIAL</span>
+<span class="text-on-surface-variant font-sans text-xs">One non-critical data connector encountered network throttle.</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container/70 border border-outline-variant/40 flex items-center justify-between">
+<span class="text-red-400 font-bold">BLOCKED</span>
+<span class="text-on-surface-variant font-sans text-xs">Preflight check failed or read-only boundary tripped.</span>
+</div>
+</div>
+</div>
+<!-- Tier 2: Evidence Outcome State -->
+<div class="p-6 rounded-2xl bg-surface-container border border-primary/40 shadow-xl">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">gavel</span>
+<h3 class="text-base font-bold text-white">Tier 2: Evidence Outcome State</h3>
+</div>
+<span class="text-xs font-mono px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/30">BUSINESS EVIDENCE LAYER</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-6 leading-relaxed">Evaluates whether factual claims are verified by cited source records without contradictions.</p>
+<div class="space-y-3 font-mono text-xs">
+<div class="p-3 rounded-lg bg-surface-container-high border border-primary/30 flex items-center justify-between">
+<span class="text-primary font-bold">SATISFIED</span>
+<span class="text-on-surface-variant font-sans text-xs">Every claim backed by admissible source hashes. Valid fee charged.</span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container-high border border-amber-500/30 flex items-center justify-between">
+<span class="text-amber-400 font-bold">CONDITIONAL</span>
+<span class="text-on-surface-variant font-sans text-xs">Conflict flagged (e.g. CRM vs Email ARR). <strong>Outcome Fee: $0.00</strong></span>
+</div>
+<div class="p-3 rounded-lg bg-surface-container-high border border-red-500/30 flex items-center justify-between">
+<span class="text-red-400 font-bold">UNVERIFIED</span>
+<span class="text-on-surface-variant font-sans text-xs">Evidence missing, broken references, or expired TTL. <strong>Fee: $0.00</strong></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Realistic Scenario Clarification -->
+<div class="p-6 rounded-2xl bg-gradient-to-r from-surface-container-low to-surface-container border border-outline-variant/80">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary text-[28px] shrink-0 mt-1">lightbulb</span>
+<div>
+<h4 class="text-base font-bold text-white">The Real-World Test: CRM vs. Email Negotiation Conflict</h4>
+<p class="text-sm text-on-surface-variant mt-1.5 leading-relaxed">
+                When an executive asks for a meeting dossier, CRM Salesforce shows <span class="text-white font-mono">$1,200,000 ARR</span> while an internal meeting note from yesterday states: <span class="text-white font-mono">"Buyer revised budget ceiling down to $850,000"</span>. Traditional AI blends these or picks one arbitrarily, billing you for a hallucinated brief. Dotonomy records Tier 1 <span class="text-emerald-400 font-mono">COMPLETED</span> (APIs responded normally), but Tier 2 triggers <span class="text-amber-400 font-mono">CONDITIONAL (CONFLICT_DETECTED)</span>. The brief explicitly highlights both figures side-by-side, halts false consensus, and your outcome bill is strictly <span class="text-primary font-mono font-bold">$0.00</span>.
+              </p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- PRODUCT DEMO: CLIENT MEETING READINESS PACK v0.1 -->
+<section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="meeting-wedge">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="p-8 lg:p-12 rounded-3xl bg-surface-container-lowest border border-outline-variant/80 shadow-2xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+<div class="lg:col-span-5">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ BUILT FOR SALES LEADERS &amp; CS TEAMS ]</div>
+<h2 class="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-2">
+                Client Meeting Readiness Pack v0.1
+              </h2>
+<p class="text-sm text-on-surface-variant mt-4 leading-relaxed">
+                Enterprise sales reps and Account Executives spend hours cross-referencing Salesforce records, email threads, and calendar attendee histories before QBRs. Dotonomy produces verified, read-only dossiers with traceable citations.
+              </p>
+<div class="mt-6 space-y-3 font-mono text-xs">
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span>100% Read-Only: Zero write APIs connected</span>
+</div>
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span>Salesforce CRM + GSuite Calendar + Shared Drive</span>
+</div>
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span>Sentence-Level Provenance Source IDs</span>
+</div>
+<div class="flex items-center gap-2 text-white">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span>Automated Conflict Flagging (e.g. Budget Mismatches)</span>
+</div>
+</div>
+<div class="mt-8 flex items-center gap-3">
+<a class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary font-semibold text-xs hover:bg-emerald-400 transition-all" href="#simulator">
+<span>Run Interactive Simulator</span>
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+</a>
+<a class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-outline-variant text-slate-300 text-xs font-semibold hover:bg-surface-container transition-all" href="#trial">
+<span>Start 14-Day Pilot</span>
+</a>
+</div>
+</div>
+<!-- Realistic Meeting Dossier Preview -->
+<div class="lg:col-span-7">
+<div class="rounded-xl bg-[#0b0f17] border border-outline-variant/80 p-5 shadow-xl">
+<div class="flex items-center justify-between pb-3 border-b border-outline-variant/60 font-mono text-xs mb-4">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+<span class="text-white font-semibold">Executive Dossier: Horizon Global Renewals</span>
+</div>
+<span class="text-[10px] px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-700/50">CONDITIONAL (CONFLICT)</span>
+</div>
+<div class="space-y-3.5 text-xs leading-relaxed">
+<p class="text-slate-200">
+                    Lead executive sponsor scheduled annual contract review for Thursday 14:00 EST 
+                    <span class="text-secondary font-mono bg-surface-container-high px-1.5 py-0.5 rounded border border-outline-variant/40">[Cal-Event #412]</span>.
+                  </p>
+<!-- Adversarial Conflict Highlight -->
+<div class="p-3.5 rounded-lg bg-amber-950/20 border border-amber-500/40 space-y-1.5">
+<div class="flex items-center gap-2 text-amber-400 font-mono font-semibold text-[11px]">
+<span class="material-symbols-outlined text-[16px]">priority_high</span>
+<span>FACTUAL CONFLICT DETECTED — CONSENSUS HALTED</span>
+</div>
+<p class="text-slate-300 text-[11px]">
+                      Salesforce CRM lists target renewal ARR as <strong class="text-white">$1,200,000</strong> <span class="text-secondary font-mono bg-surface-container px-1 py-0.2 rounded">[SFDC-Opp #771]</span>. 
+                      However, executive email thread #412 from Oct 19 cites <strong class="text-amber-300">$850,000 ceiling</strong> due to procurement budget freeze <span class="text-secondary font-mono bg-surface-container px-1 py-0.2 rounded">[Mail-Thread #412]</span>.
+                    </p>
+<p class="text-slate-400 text-[10px] font-mono">
+                      Rule Applied: Contradiction halted synthetic projection. Outcome set to CONDITIONAL.
+                    </p>
+</div>
+<p class="text-slate-200">
+                    Security review sign-off completed by CISO office on Oct 14 
+                    <span class="text-secondary font-mono bg-surface-container-high px-1.5 py-0.5 rounded border border-outline-variant/40">[Doc-Ref #998]</span>.
+                  </p>
+<div class="p-3 rounded-lg bg-[#070a10] border border-outline-variant/50 font-mono text-[11px] flex flex-wrap items-center justify-between gap-2">
+<span class="text-on-surface-variant">ED25519 RUNTIME SIGNATURE:</span>
+<span class="text-primary truncate font-bold">0x4f92...a881 [FEE: $0.00 VOIDED]</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ESSENTIAL NEW SECTION: WHAT AN OUTCOME RECEIPT PROVES — AND WHAT IT DOESN'T -->
+<section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="proves-section">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-12">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ TRANSPARENT GOVERNANCE BOUNDS ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            What an Outcome Receipt Proves — And What It Doesn't
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            Cryptographic receipts provide mathematical guarantees regarding process, citations, and hash integrity. They do not replace human enterprise judgment.
+          </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- What It Proves -->
+<div class="p-7 rounded-2xl bg-surface-container-low border border-primary/40 shadow-lg">
+<div class="flex items-center gap-3 mb-5">
+<span class="material-symbols-outlined text-primary text-[26px]">check_circle</span>
+<h3 class="text-lg font-bold text-white">What the Receipt Proves</h3>
+</div>
+<ul class="space-y-4 text-xs leading-relaxed text-slate-300">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<strong class="text-white block font-medium">Input Contract &amp; Version Hash:</strong>
+                  The exact JSON schema, dot capability versions, and execution plan hash applied to this task.
+                </div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<strong class="text-white block font-medium">7 Preflight Policy Gates:</strong>
+                  Documented cryptographic record that every preflight gate (permissions, freshness, effect bounds) passed cleanly.
+                </div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<strong class="text-white block font-medium">Sentence-Level Citation Mapping:</strong>
+                  Every assertion links to a concrete, immutable source reference UUID and timestamp in the customer audit log.
+                </div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
+<div>
+<strong class="text-white block font-medium">Ed25519 Asymmetric Signature Integrity:</strong>
+                  Proof that the receipt was signed with Dotonomy’s private key and has not been modified by a single byte since issue.
+                </div>
+</li>
+</ul>
+</div>
+<!-- What It Does NOT Prove -->
+<div class="p-7 rounded-2xl bg-surface-container-low border border-outline-variant/60">
+<div class="flex items-center gap-3 mb-5">
+<span class="material-symbols-outlined text-amber-400 text-[26px]">info</span>
+<h3 class="text-lg font-bold text-white">What the Receipt Does NOT Prove</h3>
+</div>
+<ul class="space-y-4 text-xs leading-relaxed text-slate-300">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-400 text-[18px] shrink-0 mt-0.5">block</span>
+<div>
+<strong class="text-white block font-medium">External Ground Truth ("Garbage In, Garbage Verified"):</strong>
+                  If a user entered an incorrect number into Salesforce last month, the receipt verifies that the brief faithfully cited the CRM record, not that the record reflects physical reality.
+                </div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-400 text-[18px] shrink-0 mt-0.5">block</span>
+<div>
+<strong class="text-white block font-medium">Future Commercial Deal Outcomes:</strong>
+                  A verified meeting readiness brief prepares executives with exact records; it cannot guarantee deal closure or substitute for sales acumen.
+                </div>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-400 text-[18px] shrink-0 mt-0.5">block</span>
+<div>
+<strong class="text-white block font-medium">Substitute for Formal Legal Counsel:</strong>
+                  Receipts confirm data provenance and policy adherence under contract specifications; they do not constitute legal advice or statutory indemnity.
+                </div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<!-- LIVE TELEMETRY SIMULATOR -->
+<section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="simulator">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-10">
+<div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ RUNTIME EMULATOR ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            Simulate Deterministic Execution
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            Run sample enterprise payloads through Dotonomy's kernel. Observe how contradicting evidence triggers an immediate operational halt with <strong class="text-white">$0.00 fee liability</strong>.
+          </p>
+</div>
+<div class="rounded-2xl bg-[#080c13] border border-outline-variant/80 shadow-2xl overflow-hidden font-mono text-xs">
+<!-- Control Bar -->
+<div class="px-6 py-4 bg-surface-container border-b border-outline-variant/60 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant">SELECT SCENARIO:</span>
+<button class="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-bold text-xs shadow-sm transition-all" id="btnValid">
+                Normal: Clean Synthesis
+              </button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface hover:text-white border border-outline-variant/60 text-xs transition-all" id="btnConflict">
+                Adversarial: CRM vs Email ARR Conflict
+              </button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface hover:text-white border border-outline-variant/60 text-xs transition-all" id="btnStale">
+                Boundary: Stale Record Rejection
+              </button>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-on-surface-variant">WORKSPACE:</span>
+<span class="text-secondary">apex_technologies_pilot</span>
+</div>
+</div>
+<!-- Log Display Window -->
+<div aria-live="polite" class="p-6 space-y-2 text-slate-300 min-h-[260px] max-h-[380px] overflow-y-auto" id="simulatorTerminal">
+<p><span class="text-slate-500">00:00.002</span> <span class="text-purple-400">[GATE 1-4: PREFLIGHT]</span> Contract <span class="text-white">contract.client_brief.v01</span> compiled. Scoped OAuth checked. Effect bounds: READ_ONLY verified.</p>
+<p><span class="text-slate-500">00:00.038</span> <span class="text-secondary">[GATE 5-7: PREFLIGHT]</span> Evidence paths active. Freshness bounds checked (TTL ≤ 180m). Timeout initialized (15s ceiling).</p>
+<p><span class="text-slate-500">00:00.170</span> <span class="text-primary">[STAGE: EXECUTE]</span> Ingested Salesforce CRM Account #771 and Google Calendar Invite #412.</p>
+<p><span class="text-slate-500">00:00.310</span> <span class="text-amber-400">[STAGE: VERIFY]</span> Cross-verifying attendee names and renewal scope. Citations linked: 4. Contradictions: 0.</p>
+<p><span class="text-slate-500">00:00.480</span> <span class="text-emerald-400 font-bold">[STAGE: RECEIPT]</span> Two-Tier Decoupling Output:</p>
+<p class="pl-6"><span class="text-slate-400">↳ Tier 1 Operational Run State:</span> <span class="text-emerald-400 font-bold">COMPLETED</span> (200 OK)</p>
+<p class="pl-6"><span class="text-slate-400">↳ Tier 2 Evidence Outcome State:</span> <span class="text-emerald-400 font-bold">SATISFIED</span> (100% Provenance Bound)</p>
+<p class="pl-6"><span class="text-slate-400">↳ Settlement:</span> <span class="text-white font-bold">Outcome Pilot Rate</span> applied. Ed25519 Sig: <span class="text-secondary">0x8a91b8...ed25519</span></p>
+</div>
+<!-- Bottom Footer Status -->
+<div class="px-6 py-3 bg-surface-container-high/60 border-t border-outline-variant/60 flex items-center justify-between text-xs">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary" id="simLedgerIndicator"></span>
+<span class="text-on-surface-variant">STATE:</span>
+<span class="text-primary font-bold" id="simStatus">RUN_SATISFIED (VALID)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface-variant">SETTLEMENT OUTCOME:</span>
+<span class="text-white font-bold" id="simFee">Standard Pilot Rate</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- WORKING IN-PAGE INTERACTIVE PUBLIC RECEIPT VERIFIER -->
+<section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="receipt-verifier">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="max-w-3xl mb-12">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ CLIENT-SIDE TOOL ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            Public Receipt Verifier
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            Every task generates an Ed25519-signed JSON payload. Use this validator to test signature integrity or simulate an unauthorized payload alteration.
+          </p>
+</div>
+<div class="rounded-2xl bg-[#090d15] border border-outline-variant/80 shadow-2xl p-6 font-mono">
+<div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-outline-variant/60 text-xs">
+<div class="flex items-center gap-2">
+<span class="text-slate-300 font-bold">INSPECT RECEIPT JSON</span>
+<span class="text-[10px] px-2 py-0.5 rounded bg-surface-container text-secondary border border-secondary/30">ED25519 TEST SUITE</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1 rounded bg-surface-container hover:bg-surface-bright text-xs text-slate-200 border border-outline-variant/60 transition-all" id="btnLoadValidReceipt">
+                Load Valid Receipt
+              </button>
+<button class="px-3 py-1 rounded bg-surface-container hover:bg-surface-bright text-xs text-amber-300 border border-amber-600/50 transition-all" id="btnLoadTamperedReceipt">
+                Simulate Tampered Amount
+              </button>
+</div>
+</div>
+<!-- Payload Textarea -->
+<div class="mt-4">
+<label class="sr-only" for="receiptInputArea">Receipt JSON Payload</label>
+<textarea class="w-full h-56 p-4 rounded-xl bg-[#06080e] border border-outline-variant/60 text-xs text-slate-200 font-mono leading-relaxed focus:border-primary focus:outline-none" id="receiptInputArea" spellcheck="false"></textarea>
+</div>
+<!-- Verification Action Bar -->
+<div class="mt-4 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-outline-variant/50">
+<div class="flex items-center gap-3">
+<button class="px-5 py-2.5 rounded-xl bg-primary hover:bg-emerald-400 text-on-primary font-bold text-xs flex items-center gap-2 transition-all shadow-md" id="btnVerifySignature">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Verify Cryptographic Signature</span>
+</button>
+<span class="text-xs text-on-surface-variant font-sans">Public Key: <span class="font-mono text-slate-300">ed25519_pk_dotonomy_pub_91a0</span></span>
+</div>
+<!-- Verification Status Badge -->
+<div class="px-3.5 py-1.5 rounded-lg bg-surface-container border border-outline-variant text-xs flex items-center gap-2 font-mono" id="verifierResultBadge">
+<span class="w-2 h-2 rounded-full bg-slate-500" id="badgeDot"></span>
+<span class="text-slate-300" id="badgeText">READY FOR VERIFICATION</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- HONEST COMMERCIAL MODEL & "WHO CHECKS THE CHECKER?" -->
+<section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="billing">
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center max-w-3xl mx-auto mb-14">
+<div class="font-mono text-xs uppercase tracking-widest text-primary font-semibold">[ COMMERCIAL MODEL &amp; ARBITRATION ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">
+            Settle-on-Satisfaction Commercial Model
+          </h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">
+            Eliminate speculative cloud billing. You only pay for dossiers where acceptance criteria are proven. Blocked, conditional, or unverified runs are billed at <strong class="text-white">$0.00</strong>.
+          </p>
+</div>
+<!-- 3 Transparent Commercial Tiers -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- Tier 1: Free Evaluation -->
+<div class="p-8 rounded-2xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-mono text-secondary font-semibold">14-DAY PILOT</span>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">READ-ONLY</span>
+</div>
+<h3 class="text-xl font-bold text-white">Free Evaluation</h3>
+<div class="mt-4 flex items-baseline gap-1">
+<span class="text-4xl font-bold text-white font-mono">$0</span>
+<span class="text-xs text-on-surface-variant font-mono">/ 14 days</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-4 leading-relaxed">
+                Test contract preflight gates on synthetic datasets or read-only CRM test fixtures. Capped at 50 runs.
+              </p>
+<ul class="mt-6 space-y-3 text-xs text-slate-300">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>50 Verified Pilot Executions</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Meeting Readiness Pack v0.1</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Full 7-Gate Preflight Validator</span>
+</li>
+</ul>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/40">
+<a class="w-full inline-flex justify-center py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-bright text-white text-xs font-semibold transition-all" href="#trial">
+                Start 14-Day Pilot
+              </a>
+</div>
+</div>
+<!-- Tier 2: Outcome Pilot -->
+<div class="p-8 rounded-2xl bg-surface-container border-2 border-primary shadow-2xl relative flex flex-col justify-between">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-on-primary font-mono text-[10px] uppercase font-bold tracking-wider">
+              RECOMMENDED PILOT
+            </div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-mono text-primary font-semibold">SETTLE-ON-SATISFACTION</span>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/20 text-primary">TIER 2 GUARD</span>
+</div>
+<h3 class="text-xl font-bold text-white">Outcome Pilot</h3>
+<div class="mt-4 flex items-baseline gap-1">
+<span class="text-3xl font-bold text-primary font-mono">Volume Pilot</span>
+<span class="text-xs text-on-surface-variant font-mono">/ satisfied run</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-4 leading-relaxed">
+                Flexible rate based on data connector volume. Invariant guarantee: $0 fee on Blocked or Conditional runs.
+              </p>
+<ul class="mt-6 space-y-3 text-xs text-slate-300">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span><strong>$0 Fee Invariant</strong> on Blocked / Ambiguous runs</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Ed25519-signed cryptographic receipts</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Salesforce, HubSpot &amp; GSuite integration</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>30-Day Dispute Arbitration window</span>
+</li>
+</ul>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/40">
+<a class="w-full inline-flex justify-center py-2.5 rounded-xl bg-primary hover:bg-emerald-400 text-on-primary text-xs font-bold transition-all shadow-[0_0_16px_rgba(16,185,129,0.3)]" href="#trial">
+                Enroll Organization Pilot
+              </a>
+</div>
+</div>
+<!-- Tier 3: Enterprise Dedicated Plane -->
+<div class="p-8 rounded-2xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="text-xs font-mono text-amber-400 font-semibold">CUSTOM INFRASTRUCTURE</span>
+<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant">CUSTOM SLA</span>
+</div>
+<h3 class="text-xl font-bold text-white">Dedicated Plane</h3>
+<div class="mt-4 flex items-baseline gap-1">
+<span class="text-4xl font-bold text-white font-mono">Custom</span>
+<span class="text-xs text-on-surface-variant font-mono">/ annual deployment</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-4 leading-relaxed">
+                Dedicated PostgreSQL audit cluster with customer-held Ed25519 verification keys and private network peering.
+              </p>
+<ul class="mt-6 space-y-3 text-xs text-slate-300">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Customer-Held Ed25519 Verification Keys</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Dedicated Postgres Audit Ledger Plane</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">check</span>
+<span>Custom Dot Capability Manifest Authoring</span>
+</li>
+</ul>
+</div>
+<div class="mt-8 pt-6 border-t border-outline-variant/40">
+<a class="w-full inline-flex justify-center py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-bright text-white text-xs font-semibold transition-all" href="#trial">
+                Schedule Architecture Review
+              </a>
+</div>
+</div>
+</div>
+<!-- WHO CHECKS THE CHECKER DISCLOSURE -->
+<div class="p-6 rounded-2xl bg-surface-container-low border border-outline-variant/80 flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary text-[26px] shrink-0 mt-0.5">policy</span>
+<div>
+<h4 class="text-sm font-bold text-white uppercase font-mono tracking-wider">Verifier Independence: "Who Checks the Checker?"</h4>
+<p class="text-xs text-on-surface-variant mt-1.5 leading-relaxed">
+              To resolve inherent conflicts of interest when a vendor bills based on satisfaction state, Dotonomy provides customers with an append-only raw receipt stream. Customers can independently evaluate receipt citation hashes against our public Ed25519 keys using our open-source CLI verifier. Any discrepancies qualify for an unconditional 30-day dispute arbitration credit.
+            </p>
+</div>
+</div>
+</div>
+</section>
+<!-- TRIAL SIGNUP FORM -->
+<section class="w-full bg-surface-container-lowest py-20" id="trial">
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+<div class="w-12 h-12 rounded-2xl bg-surface-container border border-outline-variant/80 p-1.5 mx-auto mb-6 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+<img alt="Dotonomy Brand Mark" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFWJxojtv2rxOJ5AGjH5R_copSUHIlPRisaU27TF3sJZ0VwY8Bt5DQJyqr00pGKhYliuRN7gWo5A_dVell4vZRite0l7T4VcM0wa9ecPVlKh979O8tMT-lvkIsbxbDB5WYQ2gRcLSFRcMovvgP_fpkbsH8SCqKxLcIS_d4aoyhrlVj9TjD_2bEsZlxj3OOrAT916g3B6m_i6ZK9enz43mbZcE3uV92JaWL_tmdL3xG-9qRDl-aJT2nJyrvRpu7Hr_awg"/>
+</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+          Start Your 14-Day Read-Only Trial
+        </h2>
+<p class="mt-3 text-sm sm:text-base text-on-surface-variant leading-relaxed">
+          Connect your CRM in read-only sandbox mode. Evaluate 50 automated briefs with verifiable sentence citations and test our $0.00 conditional settlement guarantee.
+        </p>
+<!-- Structured Signup Form -->
+<form class="mt-8 text-left space-y-4 p-6 rounded-2xl bg-surface-container border border-outline-variant/70 shadow-xl" id="pilotForm">
+<div>
+<label class="block text-xs font-mono text-slate-300 mb-1.5" for="workEmail">Work Email Address</label>
+<input class="w-full px-4 py-2.5 rounded-lg bg-[#06080e] border border-outline-variant/70 text-white placeholder:text-outline text-xs focus:outline-none focus:border-primary font-mono transition-all" id="workEmail" placeholder="rep@enterprise.corp" required="" type="email"/>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-mono text-slate-300 mb-1.5" for="orgName">Organization / Company Name</label>
+<input class="w-full px-4 py-2.5 rounded-lg bg-[#06080e] border border-outline-variant/70 text-white placeholder:text-outline text-xs focus:outline-none focus:border-primary font-mono transition-all" id="orgName" placeholder="Acme Systems" required="" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-mono text-slate-300 mb-1.5" for="primaryCrm">Primary CRM Connector</label>
+<select class="w-full px-4 py-2.5 rounded-lg bg-[#06080e] border border-outline-variant/70 text-white text-xs focus:outline-none focus:border-primary font-mono transition-all" id="primaryCrm">
+<option value="salesforce">Salesforce CRM (Read-Only)</option>
+<option value="hubspot">HubSpot CRM (Read-Only)</option>
+<option value="synthetic">Synthetic Sandbox Fixtures</option>
+</select>
+</div>
+</div>
+<button class="w-full mt-2 py-3 rounded-xl bg-primary hover:bg-emerald-400 text-on-primary font-bold text-xs uppercase font-mono tracking-wider transition-all shadow-md" type="submit">
+            Start 14-Day Read-Only Trial
+          </button>
+</form>
+<div class="hidden mt-4 p-3 rounded-lg bg-primary/10 border border-primary/30 text-primary text-xs font-mono" id="trialConfirmation">
+          ✓ Read-only workspace created. Ed25519 sandbox keys and setup instructions dispatched to your email.
+        </div>
+<div class="mt-8 flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-on-surface-variant">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[16px]">check</span> Zero write scopes</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[16px]">check</span> 50 Free Trial Executions</span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-[16px]">check</span> NDPA &amp; GDPR Compliant</span>
+</div>
+</div>
+</section>
+</main>
+<!-- ACCESSIBLE FOOTER -->
+<footer class="w-full bg-[#06090e] border-t border-outline-variant/40 py-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container border border-outline-variant/60 p-1 flex items-center justify-center">
+<img alt="Dotonomy" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFWJxojtv2rxOJ5AGjH5R_copSUHIlPRisaU27TF3sJZ0VwY8Bt5DQJyqr00pGKhYliuRN7gWo5A_dVell4vZRite0l7T4VcM0wa9ecPVlKh979O8tMT-lvkIsbxbDB5WYQ2gRcLSFRcMovvgP_fpkbsH8SCqKxLcIS_d4aoyhrlVj9TjD_2bEsZlxj3OOrAT916g3B6m_i6ZK9enz43mbZcE3uV92JaWL_tmdL3xG-9qRDl-aJT2nJyrvRpu7Hr_awg"/>
+</div>
+<div>
+<span class="font-bold text-sm text-white">Dotonomy Core Protocol</span>
+<span class="text-xs text-on-surface-variant font-mono ml-2">— Open Engineering Build v0.5</span>
+</div>
+</div>
+<div class="flex flex-wrap items-center gap-5 text-xs text-on-surface-variant font-mono">
+<a class="hover:text-white transition-colors" href="#contracts">Manifest Spec</a>
+<a class="hover:text-white transition-colors" href="#preflight-lifecycle">7 Gates</a>
+<a class="hover:text-white transition-colors" href="#receipt-verifier">Verifier CLI</a>
+<a class="hover:text-white transition-colors" href="#proves-section">Receipt Scope</a>
+<a class="hover:text-white transition-colors" href="#billing">Security &amp; NDPA</a>
+<span class="text-outline-variant">|</span>
+<span>Open Engineering Build v0.5</span>
+</div>
+</div>
+</footer>
+<!-- SCRIPT LOGIC FOR SIMULATOR & INTERACTIVE RECEIPT VERIFIER -->
+<script>
+    (function initApp() {
+      // Simulator Logic
+      const term = document.getElementById('simulatorTerminal');
+      const simStatus = document.getElementById('simStatus');
+      const simFee = document.getElementById('simFee');
+      const simIndicator = document.getElementById('simLedgerIndicator');
+      const btnValid = document.getElementById('btnValid');
+      const btnConflict = document.getElementById('btnConflict');
+      const btnStale = document.getElementById('btnStale');
+
+      function resetSimButtons() {
+        [btnValid, btnConflict, btnStale].forEach(b => {
+          if (!b) return;
+          b.className = "px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface hover:text-white border border-outline-variant/60 text-xs transition-all";
+        });
+      }
+
+      if (btnValid) {
+        btnValid.addEventListener('click', () => {
+          resetSimButtons();
+          btnValid.className = "px-3 py-1.5 rounded-lg bg-primary text-on-primary font-bold text-xs shadow-sm transition-all";
+          term.innerHTML = `
+            <p><span class="text-slate-500">00:00.002</span> <span class="text-purple-400">[GATE 1-4: PREFLIGHT]</span> Contract <span class="text-white">contract.client_brief.v01</span> compiled. Scoped OAuth checked. Effect bounds: READ_ONLY verified.</p>
+            <p><span class="text-slate-500">00:00.038</span> <span class="text-secondary">[GATE 5-7: PREFLIGHT]</span> Evidence paths active. Freshness bounds checked (TTL ≤ 180m). Timeout initialized (15s ceiling).</p>
+            <p><span class="text-slate-500">00:00.170</span> <span class="text-primary">[STAGE: EXECUTE]</span> Ingested Salesforce CRM Account #771 and Google Calendar Invite #412.</p>
+            <p><span class="text-slate-500">00:00.310</span> <span class="text-amber-400">[STAGE: VERIFY]</span> Cross-verifying attendee names and renewal scope. Citations linked: 4. Contradictions: 0.</p>
+            <p><span class="text-slate-500">00:00.480</span> <span class="text-emerald-400 font-bold">[STAGE: RECEIPT]</span> Two-Tier Decoupling Output:</p>
+            <p class="pl-6"><span class="text-slate-400">↳ Tier 1 Operational Run State:</span> <span class="text-emerald-400 font-bold">COMPLETED</span> (200 OK)</p>
+            <p class="pl-6"><span class="text-slate-400">↳ Tier 2 Evidence Outcome State:</span> <span class="text-emerald-400 font-bold">SATISFIED</span> (100% Provenance Bound)</p>
+            <p class="pl-6"><span class="text-slate-400">↳ Settlement:</span> <span class="text-white font-bold">Outcome Pilot Rate</span> applied. Ed25519 Sig: <span class="text-secondary">0x8a91b8...ed25519</span></p>
+          `;
+          simStatus.textContent = "RUN_SATISFIED (VALID)";
+          simStatus.className = "text-primary font-bold";
+          simIndicator.className = "w-2 h-2 rounded-full bg-primary";
+          simFee.textContent = "Standard Pilot Rate";
+        });
+      }
+
+      if (btnConflict) {
+        btnConflict.addEventListener('click', () => {
+          resetSimButtons();
+          btnConflict.className = "px-3 py-1.5 rounded-lg bg-amber-500 text-black font-bold text-xs shadow-sm transition-all";
+          term.innerHTML = `
+            <p><span class="text-slate-500">00:00.002</span> <span class="text-purple-400">[GATE 1-4: PREFLIGHT]</span> Contract <span class="text-white">contract.client_brief.v01</span> accepted.</p>
+            <p><span class="text-slate-500">00:00.040</span> <span class="text-secondary">[STAGE: EXECUTE]</span> Ingested Salesforce ARR: <span class="text-white font-bold">$1,200,000</span>.</p>
+            <p><span class="text-slate-500">00:00.095</span> <span class="text-secondary">[STAGE: EXECUTE]</span> Ingested Negotiation Note #412: <span class="text-amber-300 font-bold">"$850,000 ceiling budget freeze"</span>.</p>
+            <p><span class="text-slate-500">00:00.180</span> <span class="text-amber-400 font-bold">[STAGE: VERIFY]</span> FACTUAL CONFLICT DETECTED! CRM ARR deviates from buyer correspondence.</p>
+            <p><span class="text-slate-500">00:00.240</span> <span class="text-slate-300">[STAGE: BRIEF GENERATION]</span> Consensus halted. Both citations reported side-by-side with warning flag.</p>
+            <p><span class="text-slate-500">00:00.320</span> <span class="text-amber-400 font-bold">[STAGE: RECEIPT]</span> Two-Tier Decoupling Output:</p>
+            <p class="pl-6"><span class="text-slate-400">↳ Tier 1 Operational Run State:</span> <span class="text-emerald-400 font-bold">COMPLETED</span> (Read-only tools completed without crash)</p>
+            <p class="pl-6"><span class="text-slate-400">↳ Tier 2 Evidence Outcome State:</span> <span class="text-amber-400 font-bold">CONDITIONAL (CONFLICT_FLAGGED)</span></p>
+            <p class="pl-6"><span class="text-slate-400">↳ Settlement:</span> <span class="text-emerald-400 font-bold">$0.00 (FINANCIAL SHIELD INVOKED: UNRESOLVED CONFLICT)</span></p>
+          `;
+          simStatus.textContent = "CONDITIONAL (CONFLICT)";
+          simStatus.className = "text-amber-400 font-bold";
+          simIndicator.className = "w-2 h-2 rounded-full bg-amber-400";
+          simFee.textContent = "$0.00 (FEE VOIDED)";
+        });
+      }
+
+      if (btnStale) {
+        btnStale.addEventListener('click', () => {
+          resetSimButtons();
+          btnStale.className = "px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-xs shadow-sm transition-all";
+          term.innerHTML = `
+            <p><span class="text-slate-500">00:00.002</span> <span class="text-purple-400">[GATE 1: PREFLIGHT]</span> Schema parsed.</p>
+            <p><span class="text-slate-500">00:00.035</span> <span class="text-red-400 font-bold">[GATE 6: FRESHNESS HORIZON FAILED]</span> Candidate CRM deal stage timestamp is 420 minutes old (Policy TTL ≤ 180m).</p>
+            <p><span class="text-slate-500">00:00.050</span> <span class="text-red-400">[PREFLIGHT HALT]</span> Execution aborted prior to compute spend.</p>
+            <p><span class="text-slate-500">00:00.070</span> <span class="text-slate-300">[STAGE: RECEIPT]</span> Two-Tier Decoupling Output:</p>
+            <p class="pl-6"><span class="text-slate-400">↳ Tier 1 Operational Run State:</span> <span class="text-red-400 font-bold">BLOCKED (PREFLIGHT_FAIL)</span></p>
+            <p class="pl-6"><span class="text-slate-400">↳ Tier 2 Evidence Outcome State:</span> <span class="text-red-400 font-bold">UNVERIFIED (STALE_DATA)</span></p>
+            <p class="pl-6"><span class="text-slate-400">↳ Settlement:</span> <span class="text-emerald-400 font-bold">$0.00 (NO CHARGE FOR BLOCKED RUNS)</span></p>
+          `;
+          simStatus.textContent = "BLOCKED (STALE DATA)";
+          simStatus.className = "text-red-400 font-bold";
+          simIndicator.className = "w-2 h-2 rounded-full bg-red-400";
+          simFee.textContent = "$0.00 (FEE VOIDED)";
+        });
+      }
+
+      // Public Receipt Verifier Logic
+      const receiptInput = document.getElementById('receiptInputArea');
+      const btnLoadValid = document.getElementById('btnLoadValidReceipt');
+      const btnLoadTampered = document.getElementById('btnLoadTamperedReceipt');
+      const btnVerify = document.getElementById('btnVerifySignature');
+      const badge = document.getElementById('verifierResultBadge');
+      const badgeDot = document.getElementById('badgeDot');
+      const badgeText = document.getElementById('badgeText');
+
+      const sampleValidReceipt = {
+        "receiptId": "rcpt_9824_dotonomy_v05",
+        "contractId": "contract.client_brief.v01",
+        "algorithm": "Ed25519",
+        "publicKeyId": "ed25519_pk_dotonomy_pub_91a0",
+        "twoTierState": {
+          "operationalRunState": "COMPLETED",
+          "evidenceOutcomeState": "SATISFIED",
+          "ambiguityDetected": false
+        },
+        "citations": [
+          { "claim": "Horizon QBR review scheduled Thursday 14:00 EST", "sourceUuid": "gcal_evt_412", "hash": "0x41b2" },
+          { "claim": "Lead Sponsor: VP Procurement", "sourceUuid": "sfdc_contact_771", "hash": "0x89d1" }
+        ],
+        "billingEnforcement": {
+          "invoicedFee": "$0.04",
+          "status": "CHARGED"
+        },
+        "ed25519Signature": "3045022100e4d1b829af4109ca88921dfbb092305a4176cf9841bb2894ca1e9203"
+      };
+
+      const sampleTamperedReceipt = {
+        "receiptId": "rcpt_9824_dotonomy_v05",
+        "contractId": "contract.client_brief.v01",
+        "algorithm": "Ed25519",
+        "publicKeyId": "ed25519_pk_dotonomy_pub_91a0",
+        "twoTierState": {
+          "operationalRunState": "COMPLETED",
+          "evidenceOutcomeState": "SATISFIED",
+          "ambiguityDetected": false
+        },
+        "citations": [
+          { "claim": "Horizon QBR review scheduled Thursday 14:00 EST", "sourceUuid": "gcal_evt_412", "hash": "0x41b2" },
+          { "claim": "Lead Sponsor: VP Procurement", "sourceUuid": "sfdc_contact_771", "hash": "0x89d1" }
+        ],
+        "billingEnforcement": {
+          "invoicedFee": "$4,000.00",
+          "status": "TAMPERED_MODIFIED_AMOUNT"
+        },
+        "ed25519Signature": "3045022100e4d1b829af4109ca88921dfbb092305a4176cf9841bb2894ca1e9203"
+      };
+
+      if (receiptInput) {
+        receiptInput.value = JSON.stringify(sampleValidReceipt, null, 2);
+      }
+
+      if (btnLoadValid) {
+        btnLoadValid.addEventListener('click', () => {
+          receiptInput.value = JSON.stringify(sampleValidReceipt, null, 2);
+          resetBadge();
+        });
+      }
+
+      if (btnLoadTampered) {
+        btnLoadTampered.addEventListener('click', () => {
+          receiptInput.value = JSON.stringify(sampleTamperedReceipt, null, 2);
+          resetBadge();
+        });
+      }
+
+      function resetBadge() {
+        badgeDot.className = "w-2 h-2 rounded-full bg-slate-500";
+        badgeText.textContent = "READY FOR VERIFICATION";
+        badgeText.className = "text-slate-300";
+        badge.className = "px-3.5 py-1.5 rounded-lg bg-surface-container border border-outline-variant text-xs flex items-center gap-2 font-mono";
+      }
+
+      if (btnVerify) {
+        btnVerify.addEventListener('click', () => {
+          try {
+            const parsed = JSON.parse(receiptInput.value);
+            // Simulated Ed25519 verification based on payload contents & signature match
+            if (parsed.billingEnforcement && parsed.billingEnforcement.invoicedFee === "$0.04" && parsed.ed25519Signature === "3045022100e4d1b829af4109ca88921dfbb092305a4176cf9841bb2894ca1e9203") {
+              badgeDot.className = "w-2 h-2 rounded-full bg-primary";
+              badgeText.textContent = "[VALID RECEIPT — ED25519 SIGNATURE UNALTERED]";
+              badgeText.className = "text-primary font-bold";
+              badge.className = "px-3.5 py-1.5 rounded-lg bg-emerald-950/60 border border-primary text-xs flex items-center gap-2 font-mono";
+            } else {
+              badgeDot.className = "w-2 h-2 rounded-full bg-red-400";
+              badgeText.textContent = "[TAMPER DETECTED — HASH DIGEST MISMATCH]";
+              badgeText.className = "text-red-400 font-bold";
+              badge.className = "px-3.5 py-1.5 rounded-lg bg-red-950/60 border border-red-700 text-xs flex items-center gap-2 font-mono";
+            }
+          } catch (e) {
+            badgeDot.className = "w-2 h-2 rounded-full bg-amber-400";
+            badgeText.textContent = "[INVALID JSON FORMAT]";
+            badgeText.className = "text-amber-400 font-bold";
+            badge.className = "px-3.5 py-1.5 rounded-lg bg-amber-950/60 border border-amber-600 text-xs flex items-center gap-2 font-mono";
+          }
+        });
+      }
+
+      // Pilot Form handler
+      const pilotForm = document.getElementById('pilotForm');
+      const trialConfirmation = document.getElementById('trialConfirmation');
+      if (pilotForm) {
+        pilotForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          trialConfirmation.classList.remove('hidden');
+          const btn = pilotForm.querySelector('button[type="submit"]');
+          if (btn) {
+            btn.textContent = "✓ Trial Workspace Created";
+            btn.disabled = true;
+            btn.className = "w-full mt-2 py-3 rounded-xl bg-surface-container-high text-emerald-400 font-bold text-xs uppercase font-mono tracking-wider transition-all cursor-not-allowed border border-primary/40";
+          }
+        });
+      }
+    })();
+  </script>
+</body></html>
