@@ -33,7 +33,7 @@ function compose(v){const C=[],f=(text,cites)=>C.push({kind:'fact',text,cites});
  return{ok:true,value:{claims:C,gaps},src:[]}}
 export const DOTS={
  'calendar.find_meeting':{version:'1.0.0',effect:'read',perms:['calendar.read'],ins:[],out:'Meeting',accepts:{},forbid:[],labels:['business_contact'],
-  run:(v,p)=>{const h=p.hint.toLowerCase();const m=FIX.events.filter(e=>e.id===p.hint||(h&&e.client.toLowerCase().includes(h)));
+  run:(v,p)=>{const h=p.hint.toLowerCase(),L=p.ctx?.events||FIX.events;const m=L.filter(e=>e.id===p.hint||(h&&(e.client.toLowerCase().includes(h)||e.title.toLowerCase().includes(h))));
    if(m.length!==1)return{ok:false,code:m.length?'AMBIGUOUS_MATCH':'NO_MATCH',candidates:m.map(e=>e.title)};
    return{ok:true,value:m[0],src:[{id:'cal:'+m[0].id}]}}},
  'crm.get_account':{version:'1.0.0',effect:'read',perms:['crm.read'],ins:['Meeting'],out:'Account',extra:['internal_margin'],accepts:{Meeting:['client']},forbid:[],labels:['business_contact','confidential'],
@@ -77,10 +77,10 @@ export function preflight(plan,grants,REG=DOTS){const out=[],by=Object.fromEntri
  add('P5','Effect ceiling respected (draft)',ok.filter(s=>EFF.indexOf(reg(s).effect)>EFF.indexOf(CONTRACT.maxEffect)).map(s=>`${s.dot} is ${reg(s).effect}`));
  add('P7','Every hard requirement has an evidence path',CONTRACT.requirements.filter(r=>r.dot&&!plan.some(s=>s.dot===r.dot)).map(r=>r.id));
  return{ok:out.every(c=>c.result==='pass'),checks:out}}
-export function execute(plan,hint,REG=DOTS){const D={},inv=[],known=[];
+export function execute(plan,hint,REG=DOTS,ctx=null){const D={},inv=[],known=[];
  for(const s of plan){const dot=REG[s.dot],view={},recv={};
   for(const d of s.deps){const x=D[d],f=dot.accepts[x.type]||[];view[x.type]={_src:x.src.map(q=>q.id)};f.forEach(k=>view[x.type][k]=x.value[k]);recv[x.type]=f}
-  let r;try{r=dot.run(view,{hint,known})}catch{r={ok:false,code:'E_DOT_ERROR',candidates:[]}}
+  let r;try{r=dot.run(view,{hint,known,ctx})}catch{r={ok:false,code:'E_DOT_ERROR',candidates:[]}}
   if(r.ok){const bad=checkOutput(dot,r);if(bad)r={ok:false,code:'E_OUTPUT_INVALID',candidates:[bad]}}
   inv.push({step:s.id,dot:s.dot,version:dot.version,effect:dot.effect,received:recv,ok:r.ok});
   if(!r.ok)return{halted:{step:s.id,dot:s.dot,code:r.code,candidates:r.candidates},inv,D};
@@ -100,12 +100,12 @@ export function evaluate(res){const R=[];const q=(i,state,note)=>R.push({id:i,te
  const cf=mail.items.filter(m=>m.budget!=null&&m.budget!==crm.arr);rs('R7',cf.length?'CONFLICTED':'SATISFIED',cf.length?`CRM ARR ${crm.arr} vs email budget ${cf[0].budget}`:'');
  const st=R.some(r=>r.state==='FAILED')?'FAILED':R.some(r=>r.state==='STALE'||r.state==='CONFLICTED')?'CONDITIONAL':'SATISFIED';
  return{reqs:R,status:st,warnings:[...(D.s5.value.gaps||[]),...(cf.length?['Sources disagree on budget. Verify before the meeting.']:[]),...(stale?['CRM data is stale; verify before the meeting.']:[])]}}
-export function makeReceipt({runId,plan,pre,res,ev,result,prev,priv,keyId,sample}){
+export function makeReceipt({runId,plan,pre,res,ev,result,prev,priv,keyId,sample,live}){
  const body={receipt_id:'rcpt_'+runId,run_id:runId,contract:{id:CONTRACT.id,version:CONTRACT.version},created_at:new Date().toISOString(),plan_hash:sha(canon(plan)),
   policy_decisions:pre.checks.map(c=>({check:c.id,result:c.result})),dots:res.inv.map(i=>({id:i.dot,version:i.version,step:i.step,effect:i.effect})),
   datums:Object.entries(res.D||{}).map(([step,d])=>({step,type:d.type,labels:d.labels,hash:sha(canon(d.value))})),
   requirements:ev.reqs.map(({id,state})=>({id,state})),outcome_status:ev.status,warnings:ev.warnings,result_hash:sha(canon(result)),
-  prev_receipt_hash:prev||null,signed:!!priv,sample:!!sample,key_id:keyId,signature:null};
+  prev_receipt_hash:prev||null,signed:!!priv,sample:!!sample,live_sources:live||[],key_id:keyId,signature:null};
  if(priv){const {signature,...rest}=body;body.signature=crypto.sign(null,Buffer.from(canon(rest)),priv).toString('base64')}
  return body}
 export function verifyReceipt(r,pub){if(!r||!r.signature)return{valid:false,reason:'UNSIGNED_PREVIEW'};

@@ -6,3 +6,6 @@ export const signToken=(sub,secret,ttl=7*864e5)=>{const p=b(JSON.stringify({sub,
 export const verifyToken=(t,secret)=>{try{const[p,s]=t.split('.'),e=crypto.createHmac('sha256',secret).update(p).digest('base64url');
  if(s.length!==e.length||!crypto.timingSafeEqual(Buffer.from(s),Buffer.from(e)))return null;const o=JSON.parse(Buffer.from(p,'base64url'));return o.exp>Date.now()?o.sub:null}catch{return null}};
 export const parseCookies=h=>Object.fromEntries((h||'').split(';').map(c=>c.trim().split('=')).filter(x=>x[0]).map(([k,...v])=>[k,v.join('=')]));
+const ck=s=>crypto.createHash('sha256').update('conn:'+s).digest();
+export const seal=(t,secret)=>{const iv=crypto.randomBytes(12),c=crypto.createCipheriv('aes-256-gcm',ck(secret),iv),ct=Buffer.concat([c.update(t,'utf8'),c.final()]);return Buffer.concat([iv,c.getAuthTag(),ct]).toString('base64')};
+export const unseal=(b,secret)=>{const x=Buffer.from(b,'base64'),d=crypto.createDecipheriv('aes-256-gcm',ck(secret),x.subarray(0,12));d.setAuthTag(x.subarray(12,28));return Buffer.concat([d.update(x.subarray(28)),d.final()]).toString('utf8')};
