@@ -38,13 +38,13 @@ export async function build({store,secret,priv,cap=5,demoUnlock=true,allowPrivat
    missing_live_sources:['crm','mail','docs']
   });
 
-  const w={runs:0,paid:true,last:null};
+  const w=await store.workspace(q.ws);
   let ctx=null,live=[];
   if(!sample&&q.user){const c=await store.getConnector(q.ws);if(c){try{let m=cache.get(q.ws);if(!m||Date.now()-m.at>6e4){m={at:Date.now(),evs:await fetchMeetings(unseal(c,secret),{allowPrivate:allowPrivateIcs})};cache.set(q.ws,m)}ctx={events:m.evs};live=['calendar-ics']}catch{return r.status(502).json({error:'CALENDAR_UNREACHABLE',message:'Your connected calendar could not be read. Reconnect it, or disconnect to use sample data.'})}}}
   const plan=buildPlan(b),effectiveGrants=sample?(Array.isArray(b.grants)?b.grants:[]):SERVER_FIXTURE_GRANTS,pre=preflight(plan,effectiveGrants),runId=crypto.randomUUID().slice(0,8);let res,ev,result;
   if(!pre.ok){res={inv:[],D:{}};ev={status:'BLOCKED',warnings:['Preflight failed: '+pre.checks.filter(c=>c.result==='fail').map(c=>c.id).join(', ')+'. Nothing was executed.'],reqs:CONTRACT.requirements.map(x=>({id:x.id,text:x.text,state:'UNKNOWN',note:''}))};result={}}
   else{res=execute(plan,String(b.hint||'').slice(0,80),DOTS,ctx);ev=evaluate(res);result=res.D?.s5?.value||{}}
-  const receipt=makeReceipt({runId,plan,pre,res,ev,result,prev:w.last,priv:w.paid?priv:null,keyId,sample,live});track(q.ws,sample?'demo_run':'run');if(!sample){w.runs++;w.last=sha(canon(receipt));await store.saveWorkspace(q.ws,w);await store.addReceipt(q.ws,receipt)}
+  const receipt=makeReceipt({runId,plan,pre,res,ev,result,prev:w.last,priv:(sample||w.paid)?priv:null,keyId,sample,live});track(q.ws,sample?'demo_run':'run');if(!sample){w.runs++;w.last=sha(canon(receipt));await store.saveWorkspace(q.ws,w);await store.addReceipt(q.ws,receipt)}
   r.json({runId,status:ev.status,preflight:pre,halted:res.halted||null,brief:result,requirements:ev.reqs,warnings:ev.warnings,receipt,watermark:!w.paid})}));
  app.post('/api/verify',(q,r)=>r.json(verifyReceipt(q.body?.receipt,pub)));
  app.post('/api/workspace/unlock',h(async(q,r)=>{if(!q.user)return r.status(401).json({error:'LOGIN_REQUIRED'});if(!demoUnlock)return r.status(403).json({error:'PAYMENTS_NOT_CONFIGURED'});
