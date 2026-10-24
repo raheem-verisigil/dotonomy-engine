@@ -25,17 +25,37 @@ test('IPv6 special-purpose ranges are blocked while public IPv6 remains allowed'
 test('sealed connector links round-trip and fail with the wrong key',()=>{const u='https://calendar.example/secret.ics',s=seal(u,'k1');assert.ok(!s.includes('secret'));assert.equal(unseal(s,'k1'),u);assert.throws(()=>unseal(s,'k2'))});
 test('funnel counts activation, repeat use and returns',()=>{const f=funnel([{ws:'u1',type:'signup',at:'2026-10-01T10:00:00Z'},{ws:'u1',type:'run',at:'2026-10-01T10:05:00Z'},{ws:'u1',type:'run',at:'2026-10-02T10:05:00Z'},{ws:'u1',type:'run',at:'2026-10-02T11:05:00Z'},{ws:'u2',type:'signup',at:'2026-10-01T10:00:00Z'},{ws:'a1',type:'demo_run',at:'2026-10-01T10:00:00Z'},{ws:'u1',type:'unlock',at:'2026-10-03T10:00:00Z'}]);
  assert.deepEqual([f.signups,f.activated_first_run,f.three_or_more_runs,f.returned_on_another_day,f.unlocked_demo_switch,f.demo_runs],[2,1,1,1,1,1])});
-test('HTTP: login required, a real calendar feeds the brief, receipts note the live source, funnel is admin-only',async()=>{
+test('HTTP: login required, calendar connection is recorded, incomplete live assessments are blocked',async()=>{
  const cal=http.createServer((q,r)=>{r.setHeader('content-type','text/calendar');r.end(ICS)}).listen(0),url=`http://127.0.0.1:${cal.address().port}/c.ics`;
  const app=await build({store:fileStore(fs.mkdtempSync(path.join(os.tmpdir(),'dn-'))),secret:'s',priv:crypto.generateKeyPairSync('ed25519').privateKey,cap:9,allowPrivateIcs:true,adminToken:'tok-123'}),srv=app.listen(0),base=`http://127.0.0.1:${srv.address().port}`;
- try{let c='';const call=async(p,b,h={})=>{const r=await fetch(base+p,{method:b?'POST':'GET',headers:{'content-type':'application/json',cookie:c,...h},body:b?JSON.stringify(b):undefined});const sc=r.headers.getSetCookie().map(x=>x.split(';')[0]).pop();if(sc!==undefined)c=sc;return{s:r.status,d:await r.json()}};
-  const G=['calendar.read','crm.read','mail.read','docs.read'];assert.equal((await call('/api/connectors/calendar',{url})).s,401);
-  await call('/api/auth/signup',{email:'c@x.io',password:'long-enough-pw1'});assert.equal((await call('/api/connectors/calendar',{url:'https://127.0.0.1/x.ics'})).s,400);
-  assert.equal((await call('/api/connectors/calendar',{url})).d.upcoming,1);assert.equal((await call('/api/connectors')).d.calendar.connected,true);
-  const run=await call('/api/run',{hint:'Northstar',grants:G});assert.equal(run.d.status,'SATISFIED');assert.deepEqual(run.d.receipt.live_sources,['calendar-ics']);assert.ok(run.d.brief.claims.some(x=>x.cites.some(s=>s.startsWith('cal:ics:'))));
-  assert.equal((await call('/api/run',{hint:'Horizon',grants:G})).d.status,'BLOCKED');
-  assert.equal((await call('/api/connectors/calendar/remove',{})).d.connected,false);assert.equal((await call('/api/run',{hint:'Horizon',grants:G})).d.status,'CONDITIONAL');
-  assert.equal((await call('/api/admin/funnel')).s,404);const f=await call('/api/admin/funnel',null,{'x-admin-token':'tok-123'});assert.equal(f.s,200);assert.equal(f.d.signups,1);assert.equal(f.d.calendar_connected,1);assert.ok(f.d.activated_first_run>=1)}finally{srv.close();cal.close()}});
+ try{
+  let c='';
+  const call=async(p,b,h={})=>{const r=await fetch(base+p,{method:b?'POST':'GET',headers:{'content-type':'application/json',cookie:c,...h},body:b?JSON.stringify(b):undefined});const sc=r.headers.getSetCookie().map(x=>x.split(';')[0]).pop();if(sc!==undefined)c=sc;return{s:r.status,d:await r.json()}};
+  assert.equal((await call('/api/connectors/calendar',{url})).s,401);
+  await call('/api/auth/signup',{email:'c@x.io',password:'long-enough-pw1'});
+  assert.equal((await call('/api/connectors/calendar',{url:'https://127.0.0.1/x.ics'})).s,400);
+  assert.equal((await call('/api/connectors/calendar',{url})).d.upcoming,1);
+  assert.equal((await call('/api/connectors')).d.calendar.connected,true);
+
+  const run=await call('/api/run',{hint:'Northstar',grants:['calendar.read','crm.read','mail.read','docs.read']});
+  assert.equal(run.s,409);
+  assert.equal(run.d.error,'LIVE_CONNECTORS_INCOMPLETE');
+  assert.deepEqual(run.d.missing_live_sources,['crm','mail','docs']);
+  assert.equal('receipt' in run.d,false);
+  assert.equal((await call('/api/receipts')).d.length,0);
+
+  assert.equal((await call('/api/connectors/calendar/remove',{})).d.connected,false);
+  const afterRemoval=await call('/api/run',{hint:'Horizon',grants:['calendar.read','crm.read','mail.read','docs.read']});
+  assert.equal(afterRemoval.s,409);
+  assert.equal(afterRemoval.d.error,'LIVE_CONNECTORS_INCOMPLETE');
+
+  assert.equal((await call('/api/admin/funnel')).s,404);
+  const f=await call('/api/admin/funnel',null,{'x-admin-token':'tok-123'});
+  assert.equal(f.s,200);
+  assert.equal(f.d.signups,1);
+  assert.equal(f.d.calendar_connected,1);
+ }finally{srv.close();cal.close()}
+});
 
 test('calendar fetch rejects blocked IP literals before connecting', async () => {
   for (const url of [
