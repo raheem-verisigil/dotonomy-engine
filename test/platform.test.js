@@ -20,3 +20,37 @@ test('HTTP: accounts are private, trial cap and unlock work',async()=>{
   await A('/api/run',{hint:'Northstar',grants:G});assert.equal((await A('/api/run',{hint:'Northstar',grants:G})).s,402);
   assert.equal((await A('/api/workspace/unlock',{})).d.paid,true);const signed=await A('/api/run',{hint:'Northstar',grants:G});assert.equal((await A('/api/verify',{receipt:signed.d.receipt})).d.valid,true);
   const anon=client();assert.equal((await anon('/api/workspace/unlock',{})).s,401)}finally{srv.close()}});
+
+test('HTTP: caller-supplied grants cannot change server-side preflight',async()=>{
+ const app=await build({
+  store:mk.file(),
+  secret:'grant-test-secret',
+  priv:crypto.generateKeyPairSync('ed25519').privateKey,
+  cap:9
+ });
+ const srv=app.listen(0);
+ const base=`http://127.0.0.1:${srv.address().port}`;
+ const call=async body=>{
+  const r=await fetch(base+'/api/run',{
+   method:'POST',
+   headers:{'content-type':'application/json'},
+   body:JSON.stringify(body)
+  });
+  return {status:r.status,data:await r.json()};
+ };
+ try{
+  const without=await call({hint:'Northstar',grants:[]});
+  const forged=await call({
+   hint:'Northstar',
+   grants:['calendar.read','crm.read','mail.read','docs.read','admin','mail.send']
+  });
+
+  assert.equal(without.status,200);
+  assert.equal(forged.status,200);
+  assert.equal(without.data.status,forged.data.status);
+  assert.deepEqual(without.data.preflight,forged.data.preflight);
+  assert.ok(without.data.preflight.checks.every(c=>c.result==='pass'));
+ }finally{
+  await new Promise(resolve=>srv.close(resolve));
+ }
+});

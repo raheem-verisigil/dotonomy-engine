@@ -65,8 +65,62 @@ export function registerDot(reg,id,d){const e=validateManifest(id,d);if(e.length
 Object.entries(DOTS).forEach(([id,d])=>{const e=validateManifest(id,d);if(e.length)throw new Error(`Core Dot ${id} invalid: ${e.join('; ')}`)});
 const TEMPLATE=[['s1','calendar.find_meeting',[]],['s2','crm.get_account',['s1']],['s3','mail.search_related',['s1','s2']],['s4','docs.search_related',['s2']],['s5','brief.compose',['s1','s2','s3','s4']],['s6','brief.validate',['s5']]];
 export function buildPlan(o={}){const p=TEMPLATE.map(([id,dot,deps])=>({id,dot,deps,ext:dot==='brief.compose'&&!!o.externalModel}));if(o.injectSend)p.push({id:'s7',dot:'mail.send',deps:['s5'],ext:false});return p}
+export function validatePlan(plan, REG=DOTS) {
+ const errors=[];
+ if(!Array.isArray(plan)) return {ok:false,errors:['plan must be an array']};
+ if(plan.length===0) return {ok:false,errors:['plan must contain at least one step']};
+ const positions=new Map();
+ for(let i=0;i<plan.length;i++){
+  const step=plan[i];
+  if(!step||typeof step!=='object'||Array.isArray(step)){
+   errors.push(`step at index ${i} must be an object`);continue;
+  }
+  if(typeof step.id!=='string'||!step.id.trim()){
+   errors.push(`step at index ${i} needs a non-empty id`);continue;
+  }
+  if(positions.has(step.id)){
+   errors.push(`duplicate step id: ${step.id}`);
+  }else positions.set(step.id,i);
+  if(typeof step.dot!=='string'||!step.dot.trim()){
+   errors.push(`step ${step.id} needs a Dot id`);
+  }else if(!REG[step.dot]){
+   errors.push(`unregistered Dot: ${step.dot}`);
+  }
+  if(!Array.isArray(step.deps)){
+   errors.push(`dependencies for ${step.id} must be an array`);
+  }
+ }
+ for(let i=0;i<plan.length;i++){
+  const step=plan[i];
+  if(!step||typeof step!=='object'||typeof step.id!=='string'||!Array.isArray(step.deps))continue;
+  for(const dep of step.deps){
+   if(typeof dep!=='string'||!positions.has(dep)){
+    errors.push(`missing dependency ${String(dep)} for ${step.id}`);
+   }else if(positions.get(dep)>=i){
+    errors.push(`dependency ${dep} must precede step ${step.id}`);
+   }
+  }
+ }
+ const color=new Map(),stack=[];
+ function visit(id){
+  color.set(id,1);stack.push(id);
+  const step=plan[positions.get(id)];
+  for(const dep of Array.isArray(step?.deps)?step.deps:[]){
+   if(!positions.has(dep))continue;
+   if(color.get(dep)===1){
+    const start=stack.indexOf(dep);
+    errors.push(`dependency cycle: ${[...stack.slice(start),dep].join(' -> ')}`);
+   }else if(!color.has(dep))visit(dep);
+  }
+  stack.pop();color.set(id,2);
+ }
+ for(const id of positions.keys())if(!color.has(id))visit(id);
+ return {ok:errors.length===0,errors:[...new Set(errors)]};
+}
+
 export function preflight(plan,grants,REG=DOTS){const out=[],by=Object.fromEntries(plan.map(s=>[s.id,s])),reg=s=>REG[s.dot];
  const add=(id,name,bad)=>out.push({id,name,result:bad.length?'fail':'pass',detail:bad.join('; ')||'ok'});
+ const graph=validatePlan(plan,REG);add('P0','Plan graph is valid',graph.errors);
  add('P8','Every Dot is registered and trusted',plan.filter(s=>!reg(s)).map(s=>`${s.dot} is not in the registry`));
  const ok=plan.filter(reg);
  add('P1','Types match along every edge',ok.flatMap(s=>s.deps.filter(d=>by[d]&&reg(by[d])&&!reg(s).ins.includes(reg(by[d]).out)).map(d=>`${by[d].dot} to ${s.dot}`)));
@@ -77,7 +131,7 @@ export function preflight(plan,grants,REG=DOTS){const out=[],by=Object.fromEntri
  add('P5','Effect ceiling respected (draft)',ok.filter(s=>EFF.indexOf(reg(s).effect)>EFF.indexOf(CONTRACT.maxEffect)).map(s=>`${s.dot} is ${reg(s).effect}`));
  add('P7','Every hard requirement has an evidence path',CONTRACT.requirements.filter(r=>r.dot&&!plan.some(s=>s.dot===r.dot)).map(r=>r.id));
  return{ok:out.every(c=>c.result==='pass'),checks:out}}
-export function execute(plan,hint,REG=DOTS,ctx=null){const D={},inv=[],known=[];
+export function execute(plan,hint,REG=DOTS,ctx=null){const graph=validatePlan(plan,REG);if(!graph.ok)return{halted:{step:null,dot:null,code:'E_INVALID_PLAN',candidates:graph.errors},inv:[],D:{}};const D={},inv=[],known=[];
  for(const s of plan){const dot=REG[s.dot],view={},recv={};
   for(const d of s.deps){const x=D[d],f=dot.accepts[x.type]||[];view[x.type]={_src:x.src.map(q=>q.id)};f.forEach(k=>view[x.type][k]=x.value[k]);recv[x.type]=f}
   let r;try{r=dot.run(view,{hint,known,ctx})}catch{r={ok:false,code:'E_DOT_ERROR',candidates:[]}}

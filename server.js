@@ -1,5 +1,8 @@
 import express from 'express';import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {fileURLToPath} from 'node:url';
 import {buildPlan,preflight,execute,evaluate,makeReceipt,verifyReceipt,DOTS,CONTRACT,canon,sha} from './engine.js';
+// Explicit server-owned capabilities for the current local fixture-backed Dots.
+// These do not authorize future third-party connectors or write actions.
+const SERVER_FIXTURE_GRANTS = Object.freeze(['calendar.read','crm.read','mail.read','docs.read']);
 import {hashPassword,verifyPassword,signToken,verifyToken,parseCookies,seal,unseal} from './auth.js';import {fetchMeetings} from './connectors/ics.js';import {funnel} from './funnel.js';import {fileStore,pgStore} from './store.js';
 const here=path.dirname(fileURLToPath(import.meta.url));
 export async function build({store,secret,priv,cap=5,demoUnlock=true,allowPrivateIcs=false,adminToken=process.env.ADMIN_TOKEN}){await store.init();
@@ -25,11 +28,11 @@ export async function build({store,secret,priv,cap=5,demoUnlock=true,allowPrivat
  app.get('/api/health',(q,r)=>r.json({ok:true,version:'0.4.0',store:store.kind}));
  app.get('/api/state',h(async(q,r)=>{const w=await store.workspace(q.ws);r.json({runs:w.runs,cap,paid:w.paid,email:q.user?.email||null,publicKey:pubPem,keyId,contract:CONTRACT})}));
  app.get('/api/dots',(q,r)=>r.json(Object.entries(DOTS).map(([id,d])=>({id,version:d.version,effect:d.effect,permissions:d.perms,inputs:d.ins,output:d.out,accepts:d.accepts,labels:d.labels,forbidden:d.forbid}))));
- app.post('/api/plan',(q,r)=>{const b=q.body||{},p=buildPlan(b);r.json({plan:p,...preflight(p,b.grants||[])})});
+ app.post('/api/plan',(q,r)=>{const b=q.body||{},p=buildPlan(b);r.json({plan:p,...preflight(p,SERVER_FIXTURE_GRANTS),grant_basis:'server_fixture_policy',authorization:'Planning result only; not authorization for external actions.'})});
  app.post('/api/run',(q,r,n)=>q.body?.sample===true?sampleLimit(q,r,n):n(),h(async(q,r)=>{const b=q.body||{},sample=b.sample===true,w=sample?{runs:0,paid:true,last:null}:await store.workspace(q.ws);if(!w.paid&&w.runs>=cap)return r.status(402).json({error:'TRIAL_CAP_REACHED'});
   let ctx=null,live=[];
   if(!sample&&q.user){const c=await store.getConnector(q.ws);if(c){try{let m=cache.get(q.ws);if(!m||Date.now()-m.at>6e4){m={at:Date.now(),evs:await fetchMeetings(unseal(c,secret),{allowPrivate:allowPrivateIcs})};cache.set(q.ws,m)}ctx={events:m.evs};live=['calendar-ics']}catch{return r.status(502).json({error:'CALENDAR_UNREACHABLE',message:'Your connected calendar could not be read. Reconnect it, or disconnect to use sample data.'})}}}
-  const plan=buildPlan(b),pre=preflight(plan,b.grants||[]),runId=crypto.randomUUID().slice(0,8);let res,ev,result;
+  const plan=buildPlan(b),effectiveGrants=sample?(Array.isArray(b.grants)?b.grants:[]):SERVER_FIXTURE_GRANTS,pre=preflight(plan,effectiveGrants),runId=crypto.randomUUID().slice(0,8);let res,ev,result;
   if(!pre.ok){res={inv:[],D:{}};ev={status:'BLOCKED',warnings:['Preflight failed: '+pre.checks.filter(c=>c.result==='fail').map(c=>c.id).join(', ')+'. Nothing was executed.'],reqs:CONTRACT.requirements.map(x=>({id:x.id,text:x.text,state:'UNKNOWN',note:''}))};result={}}
   else{res=execute(plan,String(b.hint||'').slice(0,80),DOTS,ctx);ev=evaluate(res);result=res.D?.s5?.value||{}}
   const receipt=makeReceipt({runId,plan,pre,res,ev,result,prev:w.last,priv:w.paid?priv:null,keyId,sample,live});track(q.ws,sample?'demo_run':'run');if(!sample){w.runs++;w.last=sha(canon(receipt));await store.saveWorkspace(q.ws,w);await store.addReceipt(q.ws,receipt)}
