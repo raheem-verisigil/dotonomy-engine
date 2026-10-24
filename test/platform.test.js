@@ -8,6 +8,18 @@ for(const[n,f]of Object.entries(mk))test(`${n} store: users, workspaces, receipt
  assert.equal((await s.userByEmail('a@x.io')).id,'u_1');const w=await s.workspace('u_1');assert.equal(w.runs,0);await s.saveWorkspace('u_1',{runs:2,paid:true,last:'h'});assert.deepEqual(await s.workspace('u_1'),{runs:2,paid:true,last:'h'});
  await s.addReceipt('u_1',{receipt_id:'r1'});await s.addReceipt('u_1',{receipt_id:'r2'});await s.addReceipt('u_9',{receipt_id:'r3'});
  assert.deepEqual((await s.receipts('u_1')).map(r=>r.receipt_id),['r2','r1']);assert.equal((await s.receipts('u_9')).length,1)});
+test('HTTP: health reports the canonical package version',async()=>{
+ const app=await build({store:mk.file(),secret:'health-test-secret',priv:crypto.generateKeyPairSync('ed25519').privateKey});
+ const srv=app.listen(0),base=`http://127.0.0.1:${srv.address().port}`;
+ try{
+  const r=await fetch(base+'/api/health');
+  assert.equal(r.status,200);
+  assert.deepEqual(await r.json(),{ok:true,version:'0.5.0',store:'file'});
+ }finally{
+  await new Promise(resolve=>srv.close(resolve));
+ }
+});
+
 test('HTTP: accounts are private, trial cap and unlock work',async()=>{
  const app=await build({store:mk.pg(),secret:'s',priv:crypto.generateKeyPairSync('ed25519').privateKey,cap:2}),srv=app.listen(0),base=`http://127.0.0.1:${srv.address().port}`;
  const client=()=>{let c='';return async(p,b)=>{const r=await fetch(base+p,{method:b?'POST':'GET',headers:{'content-type':'application/json',cookie:c},body:b?JSON.stringify(b):undefined});const sc=r.headers.getSetCookie().map(x=>x.split(';')[0]).pop();if(sc!==undefined)c=sc;return{s:r.status,d:await r.json()}}};

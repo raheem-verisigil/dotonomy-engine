@@ -1,3 +1,4 @@
+import packageJson from './package.json' with { type: 'json' };
 import express from 'express';import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {fileURLToPath} from 'node:url';
 import {buildPlan,preflight,execute,evaluate,makeReceipt,verifyReceipt,DOTS,CONTRACT,canon,sha} from './engine.js';
 // Explicit server-owned capabilities for the current local fixture-backed Dots.
@@ -25,7 +26,7 @@ export async function build({store,secret,priv,cap=5,demoUnlock=true,allowPrivat
   if(!u||!ok)return r.status(401).json({error:'Wrong email or password.'});login(q,r,u)}));
  app.post('/api/auth/logout',(q,r)=>{setCookie(q,r,'',0);r.json({ok:true})});
  app.get('/api/public-key',(q,r)=>r.type('text/plain').send(pubPem));
- app.get('/api/health',(q,r)=>r.json({ok:true,version:'0.4.0',store:store.kind}));
+ app.get('/api/health',(q,r)=>r.json({ok:true,version:packageJson.version,store:store.kind}));
  app.get('/api/state',h(async(q,r)=>{const w=await store.workspace(q.ws);r.json({runs:w.runs,cap,paid:w.paid,email:q.user?.email||null,publicKey:pubPem,keyId,contract:CONTRACT})}));
  app.get('/api/dots',(q,r)=>r.json(Object.entries(DOTS).map(([id,d])=>({id,version:d.version,effect:d.effect,permissions:d.perms,inputs:d.ins,output:d.out,accepts:d.accepts,labels:d.labels,forbidden:d.forbid}))));
  app.post('/api/plan',(q,r)=>{const b=q.body||{},p=buildPlan(b);r.json({plan:p,...preflight(p,SERVER_FIXTURE_GRANTS),grant_basis:'server_fixture_policy',authorization:'Planning result only; not authorization for external actions.'})});
