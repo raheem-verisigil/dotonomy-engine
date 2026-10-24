@@ -5,6 +5,23 @@ const ICS=`BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:abc123@x\r\nSUMMARY:Northstar 
 test('ICS parsing unfolds lines, reads attendees, and keeps only the next 14 days',()=>{const m=toMeetings(parseIcs(ICS));assert.equal(m.length,1);assert.equal(m[0].title,'Northstar planning sync');assert.equal(m[0].client,'Northstar');assert.deepEqual(m[0].attendees,['Ada Obi'])});
 test('private, loopback and metadata addresses are blocked; http is refused',async()=>{for(const a of['127.0.0.1','10.1.2.3','192.168.0.5','172.20.1.1','169.254.169.254','::1','fd00::1','::ffff:10.0.0.1'])assert.equal(blocked(a),true,a);assert.equal(blocked('93.184.216.34'),false);
  await assert.rejects(()=>fetchText('http://example.com/c.ics'),/https/);await assert.rejects(()=>fetchText('https://127.0.0.1/c.ics'),/not allowed|reach/)});
+test('IPv6 special-purpose ranges are blocked while public IPv6 remains allowed', () => {
+  for (const address of [
+    '2001:0::1',
+    '2001:1ff::1',
+    '2001:db8::1',
+    '2002::1',
+    '3fff::1',
+    '::ffff:10.0.0.1'
+  ]) assert.equal(blocked(address), true, address);
+
+  for (const address of [
+    '2001:200::1',
+    '2001:4860:4860::8888',
+    '2606:4700:4700::1111'
+  ]) assert.equal(blocked(address), false, address);
+});
+
 test('sealed connector links round-trip and fail with the wrong key',()=>{const u='https://calendar.example/secret.ics',s=seal(u,'k1');assert.ok(!s.includes('secret'));assert.equal(unseal(s,'k1'),u);assert.throws(()=>unseal(s,'k2'))});
 test('funnel counts activation, repeat use and returns',()=>{const f=funnel([{ws:'u1',type:'signup',at:'2026-10-01T10:00:00Z'},{ws:'u1',type:'run',at:'2026-10-01T10:05:00Z'},{ws:'u1',type:'run',at:'2026-10-02T10:05:00Z'},{ws:'u1',type:'run',at:'2026-10-02T11:05:00Z'},{ws:'u2',type:'signup',at:'2026-10-01T10:00:00Z'},{ws:'a1',type:'demo_run',at:'2026-10-01T10:00:00Z'},{ws:'u1',type:'unlock',at:'2026-10-03T10:00:00Z'}]);
  assert.deepEqual([f.signups,f.activated_first_run,f.three_or_more_runs,f.returned_on_another_day,f.unlocked_demo_switch,f.demo_runs],[2,1,1,1,1,1])});
@@ -19,3 +36,83 @@ test('HTTP: login required, a real calendar feeds the brief, receipts note the l
   assert.equal((await call('/api/run',{hint:'Horizon',grants:G})).d.status,'BLOCKED');
   assert.equal((await call('/api/connectors/calendar/remove',{})).d.connected,false);assert.equal((await call('/api/run',{hint:'Horizon',grants:G})).d.status,'CONDITIONAL');
   assert.equal((await call('/api/admin/funnel')).s,404);const f=await call('/api/admin/funnel',null,{'x-admin-token':'tok-123'});assert.equal(f.s,200);assert.equal(f.d.signups,1);assert.equal(f.d.calendar_connected,1);assert.ok(f.d.activated_first_run>=1)}finally{srv.close();cal.close()}});
+
+test('calendar fetch rejects blocked IP literals before connecting', async () => {
+  for (const url of [
+    'https://127.0.0.1/calendar.ics',
+    'https://169.254.169.254/latest/meta-data/',
+    'https://[::1]/calendar.ics',
+    'https://[::ffff:7f00:1]/calendar.ics'
+  ]) {
+    await assert.rejects(
+      () => fetchText(url),
+      /address not allowed/
+    );
+  }
+});
+
+test('calendar fetch refuses redirects instead of following them', async () => {
+  let targetHit = false;
+  const srv = http.createServer((req, res) => {
+    if (req.url === '/start') {
+      res.writeHead(302, { location: '/target' });
+      res.end();
+    } else {
+      targetHit = true;
+      res.end('should not be fetched');
+    }
+  }).listen(0);
+
+  try {
+    const url = `http://127.0.0.1:${srv.address().port}/start`;
+    await assert.rejects(
+      () => fetchText(url, { allowPrivate: true }),
+      /status 302/
+    );
+    assert.equal(targetHit, false);
+  } finally {
+    srv.closeAllConnections();
+    await new Promise(resolve => srv.close(resolve));
+  }
+});
+
+test('calendar fetch rejects responses exceeding the size limit', async () => {
+  const srv = http.createServer((req, res) => {
+    res.writeHead(200, { 'content-type': 'text/calendar' });
+    res.end('x'.repeat(2_000_001));
+  }).listen(0);
+
+  try {
+    const url = `http://127.0.0.1:${srv.address().port}/large.ics`;
+    await assert.rejects(
+      () => fetchText(url, { allowPrivate: true }),
+      /too large/
+    );
+  } finally {
+    srv.closeAllConnections();
+    await new Promise(resolve => srv.close(resolve));
+  }
+});
+
+test('calendar fetch enforces an overall deadline against slow-drip responses', async () => {
+  let interval;
+  const srv = http.createServer((req, res) => {
+    res.writeHead(200, { 'content-type': 'text/calendar' });
+    res.write('BEGIN:VCALENDAR\r\n');
+    interval = setInterval(() => {
+      res.write(' ');
+    }, 20);
+  }).listen(0);
+
+  try {
+    const url = `http://127.0.0.1:${srv.address().port}/slow.ics`;
+    await assert.rejects(
+      () => fetchText(url, { allowPrivate: true, timeoutMs: 100 }),
+      /timed out/
+    );
+  } finally {
+    if (interval) clearInterval(interval);
+    srv.closeAllConnections();
+    await new Promise(resolve => srv.close(resolve));
+  }
+});
