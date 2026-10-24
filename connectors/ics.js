@@ -2,7 +2,6 @@ import https from 'node:https';
 import http from 'node:http';
 import dns from 'node:dns';
 import net from 'node:net';
-import { FIX } from '../engine.js';
 
 const in4 = (a, base, bits) => {
   const n = a.split('.').reduce((v, x) => (v * 256) + Number(x), 0);
@@ -216,14 +215,11 @@ export function parseIcs(text) {
   return events.filter(event => event.id && event.title && event.start);
 }
 
+// Calendar text is not authoritative evidence of CRM account identity.
+// Until a verified mapping source exists, return no resolved client.
 export const clientOf = event => {
-  const haystack = (
-    event.title + ' ' + (event.desc || '') + ' ' + event.att.join(' ')
-  ).toLowerCase();
-
-  return Object.keys(FIX.crm).find(key =>
-    haystack.includes(key.toLowerCase())
-  ) || event.title;
+  void event;
+  return null;
 };
 
 export const toMeetings = (events, now = Date.now()) =>
