@@ -92,7 +92,7 @@
 <!-- Desktop Primary Nav -->
 <nav aria-label="Main Navigation" class="hidden lg:flex items-center gap-1 ml-4 text-[13px] font-medium text-on-surface-variant">
 <a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#contracts">Outcome Contracts</a>
-<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#preflight-lifecycle">7-Gate Lifecycle</a>
+<a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#preflight-lifecycle">Preflight Checks</a>
 <a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#state-machine">Decoupled State</a>
 <a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#meeting-wedge">Client Brief Wedge</a>
 <a class="px-3 py-1.5 rounded-md hover:text-white hover:bg-surface-container transition-colors" href="#proves-section">Receipt Scope</a>
@@ -153,8 +153,8 @@
 <!-- Honest Build Metrics (Replaced Hyper-Inflated Badges) -->
 <div class="mt-16 w-full max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-3 p-3 rounded-2xl bg-surface-container-low/90 border border-outline-variant/70 backdrop-blur-md">
 <div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
-<span class="font-mono text-2xl font-bold text-primary">7 Gates</span>
-<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Preflight Policy Checks</span>
+<span class="font-mono text-2xl font-bold text-primary">8 Checks</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Executable Preflight Checks</span>
 </div>
 <div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
 <span class="font-mono text-2xl font-bold text-secondary">Two-Tier</span>
@@ -166,7 +166,7 @@
 </div>
 <div class="p-4 rounded-xl bg-surface-container/60 border border-outline-variant/40 flex flex-col items-center">
 <span class="font-mono text-2xl font-bold text-white">$0.00</span>
-<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Planned fee if blocked</span>
+<span class="text-[11px] font-mono text-on-surface-variant uppercase tracking-wider mt-1 text-center">Billing not live</span>
 </div>
 </div>
 </div>
@@ -185,8 +185,8 @@
 <div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
 <span class="material-symbols-outlined text-secondary text-[22px] shrink-0">lock</span>
 <div>
-<h4 class="text-xs font-bold text-white font-mono uppercase">Read-Only By Construction</h4>
-<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">This build is read-only and runs on built-in sample data. It holds no write access to any outside system.</p>
+<h4 class="text-xs font-bold text-white font-mono uppercase">External Writes Disabled</h4>
+<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">Write-class actions are rejected in this build. CRM, email and documents use sample data; the optional calendar connector reads real calendar data in read-only mode.</p>
 </div>
 </div>
 <div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/50 flex items-start gap-3">
@@ -253,14 +253,14 @@
 <span class="material-symbols-outlined text-red-400 text-[18px] shrink-0 mt-0.5">money_off</span>
 <div>
 <h4 class="text-sm font-semibold text-white">Speculative Per-Token Invoicing</h4>
-<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">You pay for every reasoning loop, retried tool call, and hallucinated summary, absorbing 100% of the financial penalty when outputs cannot be cited in front of a client.</p>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Depending on the provider and pricing model, retries and unusable outputs can add cost. Dotonomy is designed to make evidence gaps and acceptance failures visible before a brief is relied upon.</p>
 </div>
 </div>
 </div>
 </div>
 <div class="mt-8 pt-4 border-t border-outline-variant/40 flex items-center justify-between text-xs font-mono">
 <span class="text-on-surface-variant">VERIFICATION AUDIT:</span>
-<span class="text-red-400 font-semibold">ZERO PROVENANCE TRAIL</span>
+<span class="text-red-400 font-semibold">PROVENANCE VARIES BY IMPLEMENTATION</span>
 </div>
 </div>
 <!-- Paradigm B: Dotonomy Outcome Contract Layer -->
@@ -297,7 +297,7 @@
 <span class="material-symbols-outlined text-emerald-400 text-[18px] shrink-0 mt-0.5">verified</span>
 <div>
 <h4 class="text-sm font-semibold text-white">Settle-on-Satisfaction Billing</h4>
-<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Planned billing model: when a run is BLOCKED, CONDITIONAL or UNVERIFIED, the outcome fee is $0.00. Billing is not live yet.</p>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Planned billing model: when a run is BLOCKED, CONDITIONAL or UNVERIFIED, the proposed outcome fee would be $0. Billing is not live, and final terms have not been published.</p>
 </div>
 </div>
 </div>
@@ -383,19 +383,19 @@
 </div>
 </div>
 </section>
-<!-- THE 7-GATE PREFLIGHT & RUNTIME LIFECYCLE (ACCURATE & RIGID) -->
+<!-- PREFLIGHT & RUNTIME LIFECYCLE -->
 <section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="preflight-lifecycle">
 <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 <div class="text-center max-w-3xl mx-auto mb-14">
-<div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ 7 STATIC PREFLIGHT GATES ]</div>
-<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">The 7-Gate Preflight Verification Lifecycle</h2>
-<p class="text-base text-on-surface-variant mt-3 leading-relaxed">Before anything runs, Dotonomy checks the whole plan against seven rules. If any check fails, nothing executes. Freshness and source conflicts are checked after the run.</p>
+<div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ PREFLIGHT POLICY CHECKS ]</div>
+<h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">The Preflight Verification Lifecycle</h2>
+<p class="text-base text-on-surface-variant mt-3 leading-relaxed">Before execution, Dotonomy validates the plan against its preflight policy. Invalid plans are rejected before execution. The diagram groups the policy into seven visible areas; the engine currently defines eight executable preflight checks. Freshness and source conflicts are assessed during or after execution.</p>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3">
 <!-- Gate 1 -->
 <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-primary/50 transition-all">
 <div>
-<span class="font-mono text-[11px] font-bold text-primary block mb-2">GATE 01</span>
+<span class="font-mono text-[11px] font-bold text-primary block mb-2">AREA 01</span>
 <h3 class="text-xs font-bold text-white">Registered Dots</h3>
 <p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Every step is a Dot in the registry. Unregistered capabilities are rejected.</p>
 </div>
@@ -404,7 +404,7 @@
 <!-- Gate 2 -->
 <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-secondary/50 transition-all">
 <div>
-<span class="font-mono text-[11px] font-bold text-secondary block mb-2">GATE 02</span>
+<span class="font-mono text-[11px] font-bold text-secondary block mb-2">AREA 02</span>
 <h3 class="text-xs font-bold text-white">Permissions</h3>
 <p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Every permission a Dot needs must be inside the grant you approved.</p>
 </div>
@@ -413,7 +413,7 @@
 <!-- Gate 3 -->
 <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-primary/50 transition-all">
 <div>
-<span class="font-mono text-[11px] font-bold text-primary block mb-2">GATE 03</span>
+<span class="font-mono text-[11px] font-bold text-primary block mb-2">AREA 03</span>
 <h3 class="text-xs font-bold text-white">Type Match</h3>
 <p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Each step's output type must equal the next step's input type.</p>
 </div>
@@ -422,7 +422,7 @@
 <!-- Gate 4 -->
 <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-emerald-400/50 transition-all">
 <div>
-<span class="font-mono text-[11px] font-bold text-emerald-400 block mb-2">GATE 04</span>
+<span class="font-mono text-[11px] font-bold text-emerald-400 block mb-2">AREA 04</span>
 <h3 class="text-xs font-bold text-white">Data Labels</h3>
 <p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">No forbidden sensitivity label may reach a Dot.</p>
 </div>
@@ -431,7 +431,7 @@
 <!-- Gate 5 -->
 <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-amber-400/50 transition-all">
 <div>
-<span class="font-mono text-[11px] font-bold text-amber-400 block mb-2">GATE 05</span>
+<span class="font-mono text-[11px] font-bold text-amber-400 block mb-2">AREA 05</span>
 <h3 class="text-xs font-bold text-white">Model Boundary</h3>
 <p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Confidential data may never reach an external model.</p>
 </div>
@@ -440,7 +440,7 @@
 <!-- Gate 6 -->
 <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-amber-400/50 transition-all">
 <div>
-<span class="font-mono text-[11px] font-bold text-amber-400 block mb-2">GATE 06</span>
+<span class="font-mono text-[11px] font-bold text-amber-400 block mb-2">AREA 06</span>
 <h3 class="text-xs font-bold text-white">Effect Ceiling</h3>
 <p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">No step above draft level is allowed. Writes are rejected.</p>
 </div>
@@ -449,7 +449,7 @@
 <!-- Gate 7 -->
 <div class="p-4 rounded-xl bg-surface-container border border-outline-variant/60 flex flex-col justify-between hover:border-primary/50 transition-all">
 <div>
-<span class="font-mono text-[11px] font-bold text-primary block mb-2">GATE 07</span>
+<span class="font-mono text-[11px] font-bold text-primary block mb-2">AREA 07</span>
 <h3 class="text-xs font-bold text-white">Evidence Paths</h3>
 <p class="text-[11px] text-on-surface-variant mt-1.5 leading-relaxed">Every hard requirement needs a step that can produce its evidence.</p>
 </div>
@@ -513,11 +513,11 @@
 </div>
 <div class="p-3 rounded-lg bg-surface-container-high border border-amber-500/30 flex items-center justify-between">
 <span class="text-amber-400 font-bold">CONDITIONAL</span>
-<span class="text-on-surface-variant font-sans text-xs">Conflict flagged (e.g. CRM vs Email ARR). <strong>Planned fee: $0.00</strong></span>
+<span class="text-on-surface-variant font-sans text-xs">Conflict flagged (e.g. CRM vs Email ARR). <strong>Billing is not live</strong></span>
 </div>
 <div class="p-3 rounded-lg bg-surface-container-high border border-red-500/30 flex items-center justify-between">
 <span class="text-red-400 font-bold">UNVERIFIED</span>
-<span class="text-on-surface-variant font-sans text-xs">Evidence is missing or a source reference is broken.<strong>Planned fee: $0.00</strong></span>
+<span class="text-on-surface-variant font-sans text-xs">Evidence is missing or a source reference is broken.<strong>Billing is not live</strong></span>
 </div>
 </div>
 </div>
@@ -529,7 +529,7 @@
 <div>
 <h4 class="text-base font-bold text-white">The Real-World Test: CRM vs. Email Negotiation Conflict</h4>
 <p class="text-sm text-on-surface-variant mt-1.5 leading-relaxed">
-                When an executive asks for a meeting dossier, CRM Salesforce shows <span class="text-white font-mono">$1,200,000 ARR</span> while an internal meeting note from yesterday states: <span class="text-white font-mono">"Buyer revised budget ceiling down to $850,000"</span>. Traditional AI blends these or picks one arbitrarily, billing you for a hallucinated brief. Dotonomy records Tier 1 <span class="text-emerald-400 font-mono">COMPLETED</span> (APIs responded normally), but Tier 2 triggers <span class="text-amber-400 font-mono">CONDITIONAL (CONFLICT_DETECTED)</span>. The brief explicitly highlights both figures side-by-side, halts false consensus, and in the planned billing model your outcome fee would be <span class="text-primary font-mono font-bold">$0.00</span>.
+                When an executive asks for a meeting dossier, CRM Salesforce shows <span class="text-white font-mono">$1,200,000 ARR</span> while an internal meeting note from yesterday states: <span class="text-white font-mono">"Buyer revised budget ceiling down to $850,000"</span>. Traditional AI blends these or picks one arbitrarily, billing you for a hallucinated brief. Dotonomy records Tier 1 <span class="text-emerald-400 font-mono">COMPLETED</span> (APIs responded normally), but Tier 2 triggers <span class="text-amber-400 font-mono">CONDITIONAL (CONFLICT_DETECTED)</span>. The brief explicitly highlights both figures side-by-side, halts false consensus, and under the proposed billing model the outcome fee would be $0; billing is not live.
               </p>
 </div>
 </div>
@@ -649,7 +649,7 @@
 <li class="flex items-start gap-3">
 <span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
 <div>
-<strong class="text-white block font-medium">7 Preflight Policy Gates:</strong>A signed record of which preflight checks ran and whether they passed.</div>
+<strong class="text-white block font-medium">Preflight Policy Checks:</strong>A signed record of which preflight checks ran and whether they passed.</div>
 </li>
 <li class="flex items-start gap-3">
 <span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">verified</span>
@@ -760,7 +760,7 @@
 </section>
 <!-- HONEST COMMERCIAL MODEL & "WHO CHECKS THE CHECKER?" -->
 <section class="w-full bg-surface-container-lowest py-20 border-b border-outline-variant/40" id="status"><div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"><div class="font-mono text-xs uppercase tracking-widest text-secondary font-semibold">[ STATUS, PLAINLY ]</div><h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mt-2">What is live today, and what is not</h2>
-<div class="grid md:grid-cols-3 gap-4 mt-8"><div class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><div class="font-mono text-xs text-primary mb-2">LIVE NOW</div><ul class="text-sm text-on-surface-variant space-y-1 list-disc pl-4"><li>Seven preflight checks that reject a bad plan before anything runs</li><li>Output validation: a Dot that returns the wrong shape is stopped</li><li>Source-conflict, stale-data and ambiguity handling</li><li>Read-only calendar connection through your calendar's secret link (titles, times, attendee names)</li><li>Ed25519-signed, hash-chained receipts with public verification</li><li>Accounts, a capped free trial, Postgres storage</li><li>Automated tests, including prompt-injection and malicious-Dot cases</li></ul></div>
+<div class="grid md:grid-cols-3 gap-4 mt-8"><div class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><div class="font-mono text-xs text-primary mb-2">LIVE NOW</div><ul class="text-sm text-on-surface-variant space-y-1 list-disc pl-4"><li>Eight executable preflight checks that reject invalid plans before execution</li><li>Output validation: a Dot that returns the wrong shape is stopped</li><li>Source-conflict, stale-data and ambiguity handling</li><li>Read-only calendar connection through your calendar's secret link (titles, times, attendee names)</li><li>Ed25519-signed receipts with hash-chain integrity and public verification; signatures do not prove source truth</li><li>Accounts, a capped free trial, Postgres storage</li><li>Automated tests, including prompt-injection and malicious-Dot cases</li></ul></div>
 <div class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><div class="font-mono text-xs text-tertiary mb-2">IN DEVELOPMENT</div><ul class="text-sm text-on-surface-variant space-y-1 list-disc pl-4"><li>Live CRM, email and document connectors</li><li>Context expiry timers and per-step time limits</li><li>Billing and a formal dispute process</li><li>Benchmark against a real AI agent</li></ul></div>
 <div class="rounded-xl bg-surface-container border border-outline-variant/60 p-6"><div class="font-mono text-xs text-slate-400 mb-2">NOT CLAIMED</div><ul class="text-sm text-on-surface-variant space-y-1 list-disc pl-4"><li>No security certifications yet</li><li>No patent, and no claim that this is a first</li><li>No guarantee that source records are true</li><li>Data-protection review still pending</li></ul></div></div>
 <div class="rounded-xl bg-surface-container border border-outline-variant/60 p-6 mt-4"><div class="font-mono text-xs text-secondary mb-2">BENCHMARK STATUS</div><p class="text-sm text-on-surface-variant">We compare the runtime with a plain tool-calling agent on the same eight cases. The first run used simulated baselines, so it only proves the test harness works. A run against a real AI agent is pending, and we will publish the numbers, good or bad, once it is done.</p></div></div></section><section class="w-full bg-surface-container-low py-20 border-b border-outline-variant/40" id="billing">
@@ -771,7 +771,7 @@
             Settle-on-Satisfaction Commercial Model
           </h2>
 <p class="text-base text-on-surface-variant mt-3 leading-relaxed">
-            Eliminate speculative cloud billing. You only pay for dossiers where acceptance criteria are proven. Blocked, conditional, or unverified runs are billed at <strong class="text-white">$0.00</strong>.
+            Proposed commercial model: charge only when agreed acceptance criteria are satisfied. Under the proposed policy, blocked, conditional, or unverified runs would have a $0 outcome fee. Billing is not live, and final terms have not been published.
           </p>
 </div>
 <!-- 3 Transparent Commercial Tiers -->
@@ -800,7 +800,7 @@
 </li>
 <li class="flex items-center gap-2">
 <span class="material-symbols-outlined text-primary text-[18px]">check</span>
-<span>Full 7-Gate Preflight Validator</span>
+<span>Full Preflight Validator</span>
 </li>
 </ul>
 </div>
@@ -938,7 +938,7 @@
 </div>
 <div class="flex flex-wrap items-center gap-5 text-xs text-on-surface-variant font-mono">
 <a class="hover:text-white transition-colors" href="#contracts">Manifest Spec</a>
-<a class="hover:text-white transition-colors" href="#preflight-lifecycle">7 Gates</a>
+<a class="hover:text-white transition-colors" href="#preflight-lifecycle">Preflight</a>
 <a class="hover:text-white transition-colors" href="#receipt-verifier">Verifier CLI</a>
 <a class="hover:text-white transition-colors" href="#proves-section">Receipt Scope</a>
 <a class="hover:text-white transition-colors" href="/privacy.html">Privacy</a>

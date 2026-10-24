@@ -32,16 +32,19 @@ pre.receipt{font:12px/1.45 ui-monospace,monospace;background:var(--bg);border:1p
 <label><input class="g" type="checkbox" value="mail.read" checked> Read email</label><label><input class="g" type="checkbox" value="docs.read" checked> Read documents</label>
 <h3 style="margin-top:14px">Try to break it</h3>
 <label><input id="ext" type="checkbox"> Send data to an external model</label><label><input id="snd" type="checkbox"> Add an unregistered "send email" step</label>
-<h3 style="margin-top:14px">Calendar (read-only)</h3><div id="connBox"><p class="empty">Loading</p></div><p id="cmsg" class="BLOCKED"></p><h3 style="margin-top:14px">Calendar (read-only)</h3><p id="cstat" style="font-size:13px;color:var(--m);margin:4px 0">Log in to connect your calendar.</p><input id="curl" type="text" placeholder="Secret iCal link (https://...)" aria-label="Secret iCal link" hidden><div class="row"><button class="b alt" id="cc" type="button" hidden>Connect</button><button class="b alt" id="cd" type="button" hidden>Disconnect</button></div><p style="font-size:12px;color:var(--m)">Paste the secret iCal address from your calendar settings. We read event titles, times and attendee names for the next 14 days. CRM, email and documents still use sample data.</p><div class="row"><button class="b alt" id="pre">Check plan only</button><button class="b" id="go">Run</button></div></div>
+<h3 style="margin-top:14px">Calendar (read-only)</h3>
+<div id="connBox"><p class="empty">Loading calendar connection…</p></div>
+<p id="cmsg" class="BLOCKED" role="status" aria-live="polite"></p>
+<p style="font-size:12px;color:var(--m)">Connect a secret iCal address to read event titles, times and attendee names for the next 14 days. CRM, email and documents still use sample data.</p><div class="row"><button class="b alt" id="pre">Check plan only</button><button class="b" id="go">Run</button></div></div>
 <div class="card" id="out"><p class="empty">Pick a client and select Run. Northstar succeeds, Acme is ambiguous, Globex has stale data. Then turn on a break-it option to see the plan rejected before anything runs.</p></div></div></section>
 <section id="dots" hidden></section><section id="rcpt" hidden></section></main>
 <script>
-const ws=localStorage.dnws||(localStorage.dnws=Math.random().toString(36).slice(2,12)),$=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const api=async(p,b)=>{const r=await fetch('/api/'+p,{method:b?'POST':'GET',headers:{'content-type':'application/json'},body:b?JSON.stringify(b):undefined});return{s:r.status,d:await r.json()}};
 const o=()=>({hint:$('#hint').value,grants:[...document.querySelectorAll('.g:checked')].map(x=>x.value),externalModel:$('#ext').checked,injectSend:$('#snd').checked});
 const chip=s=>`<span class="chip ${s}">${s}</span>`;let last=null;
 const pre=p=>`<table>${p.checks.map(c=>`<tr><td>${c.id}</td><td>${esc(c.name)}</td><td>${chip(c.result)}</td><td>${esc(c.detail)}</td></tr>`).join('')}</table>`;
-async function state(){const{d}=await api('state');$('#trial').textContent=d.paid?'Signed receipts on':`Trial: ${d.runs} of ${d.cap} runs used`;$('#unlock').hidden=d.paid||!d.email;$('#af').hidden=!!d.email;$('#lo').hidden=!d.email;$('#acct').textContent=d.email||'';conn()}
+async function state(){const{d}=await api('state');$('#trial').textContent=d.paid?'Signed receipts on':`Trial: ${d.runs} of ${d.cap} runs used`;$('#unlock').hidden=d.paid||!d.email;$('#af').hidden=!!d.email;$('#lo').hidden=!d.email;$('#acct').textContent=d.email||'';conn(d.email)}
 const auth=async p=>{const{s,d}=await api('auth/'+p,{email:$('#em').value,password:$('#pw').value});$('#amsg').textContent=s===200?'':(d.error||'Failed');$('#pw').value='';state()};
 $('#li').onclick=()=>auth('login');$('#su').onclick=()=>auth('signup');$('#lo').onclick=async()=>{await api('auth/logout',{});$('#out').innerHTML='';state()};
 $('#pre').onclick=async()=>{const{d}=await api('plan',o());$('#out').innerHTML=`<h3>Plan check</h3>${pre(d)}<p>${d.ok?'This plan is allowed to run.':'This plan would be rejected. Nothing runs.'}</p>`};
@@ -62,12 +65,52 @@ $('#unlock').onclick=async()=>{await api('workspace/unlock',{});state()};
 document.querySelectorAll('nav button').forEach(b=>b.onclick=async()=>{document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));['run','dots','rcpt'].forEach(t=>$('#'+t).hidden=t!==b.dataset.t);
  if(b.dataset.t==='dots'){const{d}=await api('dots');$('#dots').innerHTML=d.map(x=>`<div class="card dot"><code>${x.id}</code> v${x.version} ${chip(x.effect==='read'?'pass':'CONDITIONAL')} ${x.effect}<br>Needs: ${x.permissions.join(', ')||'none'}. Takes: ${x.inputs.join(', ')||'user request'}. Returns: ${x.output}. Labels: ${x.labels.join(', ')||'none'}.<br>Fields it may receive: ${esc(JSON.stringify(x.accepts))}</div>`).join('')}
  if(b.dataset.t==='rcpt'){const{d}=await api('receipts');$('#rcpt').innerHTML=d.length?`<div class="card"><table><tr><th>Receipt</th><th>Status</th><th>Signed</th><th>Time</th></tr>${d.map(r=>`<tr><td>${r.receipt_id}</td><td>${chip(r.outcome_status)}</td><td>${r.signed?'yes':'preview'}</td><td>${r.created_at.slice(0,19)}</td></tr>`).join('')}</table></div>`:'<p class="empty">No receipts yet. Run a meeting brief first.</p>'}});
-async function conn(){const{d:me}=await api('state'),el=$('#connBox');if(!me.email){el.innerHTML='<p class="empty">Log in to connect a calendar.</p>';return}const{d}=await api('connectors');
- el.innerHTML=d.calendar.connected?'<p>Calendar connected (read-only). <button class="b alt" id="cx" type="button">Disconnect</button></p>':'<input id="cu" type="url" placeholder="Secret iCal link (https://...)" aria-label="Secret iCal calendar link"><div class="row"><button class="b alt" id="cc" type="button">Connect calendar</button></div><p class="empty">Google Calendar: Settings, your calendar, Secret address in iCal format. Only titles, times and attendee names for the next 14 days are read. Type part of an event title above to build its brief.</p>';
- $('#cmsg').textContent='';if($('#cx'))$('#cx').onclick=async()=>{await api('connectors/calendar/remove',{});conn()};
- if($('#cc'))$('#cc').onclick=async()=>{const{s,d}=await api('connectors/calendar',{url:$('#cu').value});if(s!==200){$('#cmsg').textContent=d.error;return}conn()}}
-async function conn(email){const{d}=await api('connectors'),on=d.calendar.connected,li=!!email;$('#curl').hidden=!li||on;$('#cc').hidden=!li||on;$('#cd').hidden=!on;$('#cstat').textContent=!li?'Log in to connect your calendar.':on?'Calendar connected. Briefs use your real meetings.':'Not connected. Briefs use sample meetings.'}
-$('#cc').onclick=async()=>{const{s,d}=await api('connectors/calendar',{url:$('#curl').value});$('#cstat').textContent=s===200?`Connected. ${d.upcoming} meeting(s) in the next 14 days.`:(d.error||'Failed');if(s===200){$('#curl').value='';state()}};
-$('#cd').onclick=async()=>{await api('connectors/calendar/remove',{});state()};
+async function conn(email){
+ const el=$('#connBox'),msg=$('#cmsg');
+ msg.textContent='';
+ if(!email){
+  el.innerHTML='<p class="empty">Log in to connect a calendar.</p>';
+  return;
+ }
+ el.innerHTML='<p class="empty">Checking calendar connection…</p>';
+ try {
+  const {s,d}=await api('connectors');
+  if(s!==200) throw new Error(d.error||'Could not load calendar status.');
+  if(d.calendar.connected){
+   el.innerHTML='<p>Calendar connected (read-only).</p><button class="b alt" id="disconnectCalendar" type="button">Disconnect calendar</button>';
+   $('#disconnectCalendar').onclick=async()=>{
+    try {
+     const {s,d}=await api('connectors/calendar/remove',{});
+     if(s!==200) throw new Error(d.error||'Could not disconnect calendar.');
+     await state();
+     msg.textContent='Calendar disconnected.';
+    } catch(e) { msg.textContent=e.message||'Disconnect failed.'; }
+   };
+  } else {
+   el.innerHTML='<label for="calendarUrl">Secret iCal address</label><input id="calendarUrl" type="url" placeholder="https://…" autocomplete="off"><div class="row"><button class="b alt" id="connectCalendar" type="button">Connect calendar</button></div><p class="empty">For Google Calendar, find the Secret address in iCal format in your calendar settings. Only events in the next 14 days are read.</p>';
+   $('#connectCalendar').onclick=async()=>{
+    const input=$('#calendarUrl');
+    if(!input.value.trim()){
+     msg.textContent='Enter your secret iCal address first.';
+     return;
+    }
+    const button=$('#connectCalendar');
+    button.disabled=true;
+    try {
+     const {s,d}=await api('connectors/calendar',{url:input.value.trim()});
+     if(s!==200) throw new Error(d.error||'Calendar connection failed.');
+     await state();
+     msg.textContent='Calendar connected. '+(d.upcoming??0)+' upcoming meeting(s) found.';
+    } catch(e) {
+     msg.textContent=e.message||'Calendar connection failed.';
+     button.disabled=false;
+    }
+   };
+  }
+ } catch(e) {
+  el.innerHTML='<p class="empty">Calendar status is unavailable. Try refreshing the page.</p>';
+  msg.textContent=e.message||'Could not load calendar status.';
+ }
+}
 state();
 </script></body></html>
