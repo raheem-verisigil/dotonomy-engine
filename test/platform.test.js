@@ -20,49 +20,54 @@ test('HTTP: health reports the canonical package version',async()=>{
  }
 });
 
-test('HTTP: accounts are private, trial cap and unlock work',async()=>{
+test('HTTP: accounts are private, live runs are blocked, sample receipts verify and unlock works',async()=>{
  const app=await build({store:mk.pg(),secret:'s',priv:crypto.generateKeyPairSync('ed25519').privateKey,cap:2}),srv=app.listen(0),base=`http://127.0.0.1:${srv.address().port}`;
  const client=()=>{let c='';return async(p,b)=>{const r=await fetch(base+p,{method:b?'POST':'GET',headers:{'content-type':'application/json',cookie:c},body:b?JSON.stringify(b):undefined});const sc=r.headers.getSetCookie().map(x=>x.split(';')[0]).pop();if(sc!==undefined)c=sc;return{s:r.status,d:await r.json()}}};
- try{const A=client(),B=client(),G=['calendar.read','crm.read','mail.read','docs.read'];
-  assert.equal((await A('/api/auth/signup',{email:'a@x.io',password:'short'})).s,400);assert.equal((await A('/api/auth/signup',{email:'a@x.io',password:'long-enough-pw1'})).s,200);
-  assert.equal((await B('/api/auth/signup',{email:'a@x.io',password:'long-enough-pw1'})).s,409);assert.equal((await B('/api/auth/login',{email:'a@x.io',password:'nope-nope-nope'})).s,401);
+ try{
+  const A=client(),B=client(),G=['calendar.read','crm.read','mail.read','docs.read'];
+  assert.equal((await A('/api/auth/signup',{email:'a@x.io',password:'short'})).s,400);
+  assert.equal((await A('/api/auth/signup',{email:'a@x.io',password:'long-enough-pw1'})).s,200);
+  assert.equal((await B('/api/auth/signup',{email:'a@x.io',password:'long-enough-pw1'})).s,409);
+  assert.equal((await B('/api/auth/login',{email:'a@x.io',password:'nope-nope-nope'})).s,401);
   assert.equal((await B('/api/auth/signup',{email:'b@x.io',password:'long-enough-pw1'})).s,200);
-  const run=await A('/api/run',{hint:'Northstar',grants:G});assert.equal(run.d.status,'SATISFIED');assert.equal(run.d.watermark,true);
-  assert.equal((await A('/api/receipts')).d.length,1);assert.equal((await B('/api/receipts')).d.length,0);
-  await A('/api/run',{hint:'Northstar',grants:G});assert.equal((await A('/api/run',{hint:'Northstar',grants:G})).s,402);
-  assert.equal((await A('/api/workspace/unlock',{})).d.paid,true);const signed=await A('/api/run',{hint:'Northstar',grants:G});assert.equal((await A('/api/verify',{receipt:signed.d.receipt})).d.valid,true);
-  const anon=client();assert.equal((await anon('/api/workspace/unlock',{})).s,401)}finally{srv.close()}});
 
-test('HTTP: caller-supplied grants cannot change server-side preflight',async()=>{
- const app=await build({
-  store:mk.file(),
-  secret:'grant-test-secret',
-  priv:crypto.generateKeyPairSync('ed25519').privateKey,
-  cap:9
- });
- const srv=app.listen(0);
- const base=`http://127.0.0.1:${srv.address().port}`;
- const call=async body=>{
-  const r=await fetch(base+'/api/run',{
-   method:'POST',
-   headers:{'content-type':'application/json'},
-   body:JSON.stringify(body)
-  });
-  return {status:r.status,data:await r.json()};
- };
+  const blocked=await A('/api/run',{hint:'Northstar',grants:G});
+  assert.equal(blocked.s,409);
+  assert.equal(blocked.d.error,'LIVE_CONNECTORS_INCOMPLETE');
+  assert.deepEqual(blocked.d.missing_live_sources,['crm','mail','docs']);
+  assert.equal((await A('/api/receipts')).d.length,0);
+  assert.equal((await B('/api/receipts')).d.length,0);
+  assert.equal((await A('/api/state')).d.runs,0);
+
+  assert.equal((await A('/api/workspace/unlock',{})).d.paid,true);
+  const stillBlocked=await A('/api/run',{hint:'Northstar',grants:G});
+  assert.equal(stillBlocked.s,409);
+  assert.equal((await A('/api/receipts')).d.length,0);
+
+  const sample=await A('/api/run',{sample:true,hint:'Northstar'});
+  assert.ok([200,201].includes(sample.s));
+  assert.ok(sample.d.receipt);
+  assert.equal(sample.d.receipt.sample,true);
+  assert.equal((await A('/api/verify',{receipt:sample.d.receipt})).d.valid,true);
+
+  const anon=client();
+  assert.equal((await anon('/api/workspace/unlock',{})).s,401);
+ }finally{srv.close()}
+});
+
+test('HTTP: caller-supplied grants cannot bypass the live-source guard',async()=>{
+ const app=await build({store:mk.file(),secret:'grant-test-secret',priv:crypto.generateKeyPairSync('ed25519').privateKey,cap:9});
+ const srv=app.listen(0),base=`http://127.0.0.1:${srv.address().port}`;
+ const call=async body=>{const r=await fetch(base+'/api/run',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});return{status:r.status,data:await r.json()}};
  try{
   const without=await call({hint:'Northstar',grants:[]});
-  const forged=await call({
-   hint:'Northstar',
-   grants:['calendar.read','crm.read','mail.read','docs.read','admin','mail.send']
-  });
-
-  assert.equal(without.status,200);
-  assert.equal(forged.status,200);
-  assert.equal(without.data.status,forged.data.status);
-  assert.deepEqual(without.data.preflight,forged.data.preflight);
-  assert.ok(without.data.preflight.checks.every(c=>c.result==='pass'));
- }finally{
-  await new Promise(resolve=>srv.close(resolve));
- }
+  const forged=await call({hint:'Northstar',grants:['calendar.read','crm.read','mail.read','docs.read','admin','mail.send']});
+  for(const result of [without,forged]){
+   assert.equal(result.status,409);
+   assert.equal(result.data.error,'LIVE_CONNECTORS_INCOMPLETE');
+   assert.deepEqual(result.data.missing_live_sources,['crm','mail','docs']);
+   assert.equal('receipt' in result.data,false);
+  }
+  assert.deepEqual(without.data.missing_live_sources,forged.data.missing_live_sources);
+ }finally{await new Promise(resolve=>srv.close(resolve))}
 });
