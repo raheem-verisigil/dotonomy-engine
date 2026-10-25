@@ -108,10 +108,10 @@ export const CONTRACT={id:'client.meeting_readiness',version:'0.1.0',purpose:'me
  requirements:[{id:'R1',text:'Correct meeting identified',dot:'calendar.find_meeting'},{id:'R2',text:'Account identified',dot:'crm.get_account'},
  {id:'R3',text:'Interactions checked (absence is recorded)',dot:'mail.search_related'},{id:'R4',text:'Sources fresh (CRM within 24h)',dot:'crm.get_account'},
  {id:'R5',text:'Every factual claim has a source',dot:'brief.validate'},{id:'R6',text:'Zero write actions'},{id:'R7',text:'Sources do not contradict each other',dot:'mail.search_related'}]};
-const T={Meeting:{id:'string',title:'string',client:'string',start:'string',attendees:'array'},Account:{id:'string',name:'string',stage:'string',opps:'array',arr:'number',updated:'string'},Mail:{items:'array',staleExcluded:'number'},Docs:{items:'array'},Brief:{claims:'array',gaps:'array'},Validation:{unsupported:'array'}};
+const T={Meeting:{id:'string',title:'string',client:'string|null',start:'string',attendees:'array'},Account:{id:'string',name:'string',stage:'string',opps:'array',arr:'number',updated:'string'},Mail:{items:'array',staleExcluded:'number'},Docs:{items:'array'},Brief:{claims:'array',gaps:'array'},Validation:{unsupported:'array'}};
 const ty=v=>Array.isArray(v)?'array':typeof v;
 export function checkOutput(dot,r){const sch=T[dot.out];if(!r||typeof r.value!=='object'||r.value===null)return'output is not an object';
- for(const[k,t]of Object.entries(sch))if(ty(r.value[k])!==t)return`field ${k} must be ${t}`;
+ for(const[k,t]of Object.entries(sch)){const actual=ty(r.value[k]);if(t.split('|').includes(actual))continue;return`field ${k} must be ${t}`;}
  const extra=Object.keys(r.value).filter(k=>!(k in sch)&&!(dot.extra||[]).includes(k));if(extra.length)return`undeclared field(s): ${extra.join(', ')}`;
  if(!Array.isArray(r.src)||r.src.some(x=>!x||typeof x.id!=='string'||!x.id))return'malformed evidence references';return null}
 export function validateManifest(id,d){const e=[];['version','effect','perms','ins','out','accepts','forbid','labels','run'].forEach(k=>{if(d[k]===undefined)e.push('missing '+k)});
@@ -389,7 +389,7 @@ export function verifyReceiptChain(receipts, pub, options = {}) {
     chain_consistent: true,
     complete,
     anchored,
-    reason: complete ? 'CHAIN_CONSISTENT' : 'CHAIN_CONSISTENT_BUT_UNANCHORED',
+    reason: !complete ? 'CHAIN_CONSISTENT_BUT_INCOMPLETE' : !anchored ? 'CHAIN_CONSISTENT_BUT_UNANCHORED' : 'CHAIN_COMPLETE_AND_ANCHORED',
     receipt_count: receipts.length,
     first_predecessor_hash: firstPrev,
     head_hash: headHash,
